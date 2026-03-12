@@ -1,0 +1,99 @@
+# 字节码文件
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 虚拟环境
+venv/
+env/
+.venv/
+
+# 编辑器文件
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 数据文件
+data/processed/
+data/raw/*.pkl
+
+# 输出文件
+outputs/
+logs/
+sumo_output/
+
+# 检查点文件
+*.pth
+*.pt
+*.ckpt
+
+# 临时文件
+*.tmp
+*.temp
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 测试覆盖率
+.coverage
+htmlcov/
+
+# 文档构建
+docs/_build/
+
+# 包构建
+build/
+dist/
+*.egg-info/
+
+# 配置文件（包含敏感信息）
+config/local_*.yamlsumo-mcp/
+
+
+# Python虚拟环境
+traffic_env/
+env/
+venv/
+.env/
+ENV/
+
+# Python缓存
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.coverage
+
+# IDE配置
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 日志和数据
+*.log
+*.db
+*.sqlite3
+/data/
+/output/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+
+# 权重文件
+*.pth
+*.pt
+
+#备份文件
+myscript_copy/
+
+#临时输出文件
+outputs/
+
+# sumoo_mcp文件
+sumo-mcp/

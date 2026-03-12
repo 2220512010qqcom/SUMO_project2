@@ -1,0 +1,22 @@
+training:
+  total_episodes: 100
+  max_steps_per_episode: 1000
+  learning_starts: 1000
+  train_frequency: 4
+  target_network_update_freq: 1000
+  checkpoint_freq: 10
+  eval_freq: 10
+  eval_episodes: 5
+
+environment:
+  num_agents: 4
+  simulation_step: 1.0
+  # gui: false
+  gui: true
+  sumo_config: "config/sumo.net.xml"
+
+logging:
+  log_dir: "logs/"
+  tensorboard: true
+  save_model: true
+  verbose: true

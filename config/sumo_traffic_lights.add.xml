@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<additional xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/additional_file.xsd">
+
+   
+    <!-- 检测器配置 (修正为实际的车道ID) -->
+    <!-- 交叉口1的检测器 -->
+    <inductionLoop id="det_1_east" lane="1_to_3_0" pos="50" freq="1" file="detector_output.xml"/>
+    <inductionLoop id="det_1_west" lane="1_to_west1_0" pos="50" freq="1" file="detector_output.xml"/>
+    <inductionLoop id="det_1_south" lane="1_to_2_0" pos="50" freq="1" file="detector_output.xml"/>
+    <inductionLoop id="det_1_north" lane="1_to_south1_0" pos="50" freq="1" file="detector_output.xml"/>
+    
+    <!-- 交叉口2的检测器 -->
+    <inductionLoop id="det_2_west" lane="2_to_1_0" pos="50" freq="1" file="detector_output.xml"/>
+    <inductionLoop id="det_2_east" lane="2_to_north1_0" pos="50" freq="1" file="detector_output.xml"/>
+    <inductionLoop id="det_2_south" lane="2_to_4_0" pos="50" freq="1" file="detector_output.xml"/>
+    <inductionLoop id="det_2_north" lane="2_to_west2_0" pos="50" freq="1" file="detector_output.xml"/>
+    
+    <!-- 交叉口3的检测器 -->
+    <inductionLoop id="det_3_north" lane="3_to_1_0" pos="50" freq="1" file="detector_output.xml"/>
+    <inductionLoop id="det_3_south" lane="3_to_4_0" pos="50" freq="1" file="detector_output.xml"/>
+    <inductionLoop id="det_3_east" lane="3_to_east1_0" pos="50" freq="1" file="detector_output.xml"/>
+    <inductionLoop id="det_3_west" lane="3_to_south2_0" pos="50" freq="1" file="detector_output.xml"/>
+    
+    <!-- 交叉口4的检测器 -->
+    <inductionLoop id="det_4_north" lane="4_to_2_0" pos="50" freq="1" file="detector_output.xml"/>
+    <inductionLoop id="det_4_south" lane="4_to_3_0" pos="50" freq="1" file="detector_output.xml"/>
+    <inductionLoop id="det_4_west" lane="4_to_east2_0" pos="50" freq="1" file="detector_output.xml"/>
+    <inductionLoop id="det_4_east" lane="4_to_north2_0" pos="50" freq="1" file="detector_output.xml"/>
+</additional>

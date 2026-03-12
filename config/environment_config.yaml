@@ -1,0 +1,60 @@
+# 环境配置
+environment:
+  # 仿真设置
+  simulation:
+    step_length: 1.0
+    begin_time: 0
+    end_time: 3600
+    gui: false
+    # gui: true
+    random_seed: 42
+  
+  # SUMO配置
+  sumo:
+    config_file: "config/sumo_config.sumocfg"
+    net_file: "config/sumo_network.net.xml"
+    route_file: "config/sumo_routes.rou.xml"
+    additional_files: ["config/sumo_traffic_lights.add.xml"]
+    output_dir: "sumo_output"
+  
+  # agent配置 (修正为实际的道路ID)
+  intersections:
+    - id: "agent_1"
+      position: [0, 0]
+      traffic_lights: ["1"]
+      neighbors: ["agent_2", "agent_3"]
+      lanes:
+        east: ["1_to_3_0", "1_to_3_1","3_to_1_0","3_to_1_1"]      # 到节点3 (原J3)
+        west: ["1_to_west1_0", "1_to_west1_1","west1_to_1_0","west1_to_1_1"] # 到west1
+        south: ["1_to_2_0", "1_to_2_1","2_to_1_0","2_to_1_1"]     # 到节点2 (原J2)
+        north: ["1_to_south1_0", "1_to_south1_1","south1_to_1_0","south1_to_1_1"] # 到south1
+    
+    - id: "agent_2"
+      position: [0, 250]
+      traffic_lights: ["2"]
+      neighbors: ["agent_1", "agent_4"]
+      lanes:
+        south: ["2_to_1_0", "2_to_1_1","1_to_2_0", "1_to_2_1"]      # 到节点1 (原J1)
+        north: ["2_to_north1_0", "2_to_north1_1","north1_to_2_0","north1_to_2_1"] # 到north1
+        east: ["2_to_4_0", "2_to_4_1","4_to_2_0", "4_to_2_1"]     # 到节点4 (原J4)
+        west: ["2_to_west2_0", "2_to_west2_1","west2_to_2_0", "west2_to_2_1"] # 到west2
+    
+    - id: "agent_3"
+      position: [250, 0]
+      traffic_lights: ["3"]
+      neighbors: ["agent_1", "agent_4"]
+      lanes:
+        west: ["3_to_1_0", "3_to_1_1","1_to_3_0", "1_to_3_1"]     # 到节点1 (原J1)
+        north: ["3_to_4_0", "3_to_4_1","4_to_3_0", "4_to_3_1"]     # 到节点4 (原J4)
+        east: ["3_to_east1_0", "3_to_east1_1","east1_to_3_1","east1_to_3_0"] # 到east1
+        south: ["3_to_south2_0", "3_to_south2_1","south2_to_3_0","south2_to_3_1"] # 到south2
+    
+    - id: "agent_4"
+      position: [250, 250]
+      traffic_lights: ["4"]
+      neighbors: ["agent_2", "agent_3"]
+      lanes:
+        west: ["4_to_2_0", "4_to_2_1","2_to_4_0","2_to_4_1"]     # 到节点2 (原J2)
+        north: ["4_to_3_0", "4_to_3_1","3_to_4_0", "3_to_4_1"]     # 到节点3 (原J3)
+        east: ["4_to_east2_0", "4_to_east2_1","east2_to_4_0","east2_to_4_1"] # 到east2
+        north: ["4_to_north2_0", "4_to_north2_1","north2_to_4_0","north2_to_4_1"] # 到north2

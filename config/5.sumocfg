@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 2026-03-06T13:07:14.870173+00:00 by Eclipse SUMO sumo 1.25.0
+-->
+
+<sumoConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
+
+    <input>
+        <net-file value="6.net.xml"/>
+        <route-files value="5.rou.xml"/>
+    </input>
+    <time>
+        <begin value="0"/>
+        <!-- <end value="3600"/> -->
+        <step-length value="1.0"/>
+    </time> 
+    <gui_only>
+            <!-- start: 启动 SUMO-GUI 时是否立即开始仿真（true/false） -->
+            <start value="true"/>
+
+            <!-- delay: GUI 启动后的初始延迟（毫秒），用于观察初始状态或调试 -->
+            <delay value="100"/>
+    </gui_only>
+
+</sumoConfiguration>

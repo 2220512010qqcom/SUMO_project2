@@ -1,0 +1,36 @@
+<edges>
+    <!-- 水平道路 -->
+    <edge id="west1_to_1" from="west1" to="1" priority="1" numLanes="2" speed="13.89"/>
+    <edge id="1_to_3" from="1" to="3" priority="1" numLanes="2" speed="13.89"/>
+    <edge id="3_to_east1" from="3" to="east1" priority="1" numLanes="2" speed="13.89"/>
+    
+    <edge id="west2_to_2" from="west2" to="2" priority="1" numLanes="2" speed="13.89"/>
+    <edge id="2_to_4" from="2" to="4" priority="1" numLanes="2" speed="13.89"/>
+    <edge id="4_to_east2" from="4" to="east2" priority="1" numLanes="2" speed="13.89"/>
+    
+    <!-- 垂直道路 -->
+    <edge id="south1_to_1" from="south1" to="1" priority="1" numLanes="2" speed="13.89"/>
+    <edge id="1_to_2" from="1" to="2" priority="1" numLanes="2" speed="13.89"/>
+    <edge id="2_to_north1" from="2" to="north1" priority="1" numLanes="2" speed="13.89"/>
+    
+    <edge id="south2_to_3" from="south2" to="3" priority="1" numLanes="2" speed="13.89"/>
+    <edge id="3_to_4" from="3" to="4" priority="1" numLanes="2" speed="13.89"/>
+    <edge id="4_to_north2" from="4" to="north2" priority="1" numLanes="2" speed="13.89"/>
+    
+    <!-- 反向道路（双向交通） -->
+    <edge id="1_to_west1" from="1" to="west1" priority="1" numLanes="2" speed="13.89"/>
+    <edge id="3_to_1" from="3" to="1" priority="1" numLanes="2" speed="13.89"/>
+    <edge id="east1_to_3" from="east1" to="3" priority="1" numLanes="2" speed="13.89"/>
+    
+    <edge id="2_to_west2" from="2" to="west2" priority="1" numLanes="2" speed="13.89"/>
+    <edge id="4_to_2" from="4" to="2" priority="1" numLanes="2" speed="13.89"/>
+    <edge id="east2_to_4" from="east2" to="4" priority="1" numLanes="2" speed="13.89"/>
+    
+    <edge id="1_to_south1" from="1" to="south1" priority="1" numLanes="2" speed="13.89"/>
+    <edge id="2_to_1" from="2" to="1" priority="1" numLanes="2" speed="13.89"/>
+    <edge id="north1_to_2" from="north1" to="2" priority="1" numLanes="2" speed="13.89"/>
+    
+    <edge id="3_to_south2" from="3" to="south2" priority="1" numLanes="2" speed="13.89"/>
+    <edge id="4_to_3" from="4" to="3" priority="1" numLanes="2" speed="13.89"/>
+    <edge id="north2_to_4" from="north2" to="4" priority="1" numLanes="2" speed="13.89"/>
+</edges>
