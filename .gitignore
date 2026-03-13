@@ -94,6 +94,12 @@ myscript_copy/
 
 #临时输出文件
 outputs/
+/myscripts/output1/
 
 # sumoo_mcp文件
 sumo-mcp/
+
+# 所有输出的临时照片
+*.jpg
+*.png
+
