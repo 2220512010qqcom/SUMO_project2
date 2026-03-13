@@ -5,6 +5,7 @@ sumo  1.25.0
 
 python 下载地址：https://www.python.org/
 
+依次执行如下命令来搭建环境
 
 ~~~ cmd
 python -m venv traffic_env   创建虚拟环境
