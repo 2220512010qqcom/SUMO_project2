@@ -24,7 +24,7 @@ class mytrainer:
         self.max_episodes = 3000          # 最大训练回合数
         self.step_per_episode = 3600     # 每个回合的最大步数
 
-        self.plot_dir = './myscripts/output1'
+        self.plot_dir = './outputs/output1'
         self.total_reward = []
         self.max_wait_time = []
         self.emer_max_wait_time = []
