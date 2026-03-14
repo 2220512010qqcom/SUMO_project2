@@ -13,3 +13,16 @@ python -m pip install --upgrade pip  更新安装工具
 pip install -r requirements.txt  安装依赖
 python -m myscripts.mytrainer  运行程序
 ~~~
+
+注意，在运行前需要设置mytrainer 的 self.plot_dir  将其设置为自己的输出路径
+或是按照以下格式补全目录：
+├── myscripts
+│   ├── logger.py
+│   ├── myagent.py
+│   ├── mytrainer.py
+│   └── sumoController.py
+└── outputs
+    ├── output1
+    ├── output2
+    ...
+

@@ -103,6 +103,7 @@ class mytrainer:
                 print(f"智能体{self.agent_list[i].id}选择了动作{action}，持续时间为{self.duration_options[action]}秒，当前奖励为{current_reward}")
                 # self.logger.log(f"智能体{self.agent_list[i].id}选择了动作{action}，持续时间为{self.duration_options[action]}秒，当前奖励为{current_reward}")
                 self.logger.plot_agent_rewards(self.agent_list[i].id, self.agent_list[i].reward_list)  # 记录智能体的奖励数据到日志中
+                self.logger.log_agent_state(self.agent_list[i].id, current_state)  # 记录智能体的状态信息到日志中
     
 
     def step_to_next_light_change(self):

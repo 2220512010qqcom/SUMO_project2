@@ -31,6 +31,12 @@ class myLogger():
         with open(log_file_path, 'a') as log_file:
             log_file.write(message + '\n')
 
+    def log_agent_state(self, agent_id, state):
+        """记录智能体的状态信息"""
+        log_file_path = os.path.join(self.plot_dir, f"agent_{agent_id}_state_log.txt")
+        with open(log_file_path, 'a') as log_file:
+            log_file.write(f"Episode {agent_id}: State: {state}\n")
+
 
     def plot_agent_rewards(self, agent_id, reward_list):    
         """绘制单个智能体的奖励曲线"""
