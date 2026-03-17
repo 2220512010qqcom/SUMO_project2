@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    SUMO 配置文件：sumoConfiguration.xsd 参考
+    说明：此文件用于控制仿真输入、时间范围、处理选项、输出及 GUI 等行为。
+    保持路径相对于此配置文件所在目录，或使用绝对路径。
+-->
+<configuration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                             xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/sumoConfiguration.xsd">
+
+        <!-- 输入部分：指定路网、路线、额外元素（如交通灯、行人、静态障碍等） -->
+        <input>
+                <!-- net-file: SUMO 路网文件 (.net.xml)
+                         值为文件路径（相对或绝对）。该文件定义道路、车道、连接、交通信号等。 -->
+                <net-file value="sumo_network.net.xml"/>
+
+                <!-- route-files: 车辆路线文件 (.rou.xml)
+                         可以是单个文件或以空格分隔的多个文件。
+                         文件中包含车辆类型、流、独立车辆或线路定义。 -->
+                <route-files value="sumo_routes.rou.xml"/>
+
+                <!-- additional-files: 附加元素 (.add.xml)，常用于交通灯配置、检测器、静态对象等
+                         多个文件用空格分隔；亦可为空。 -->
+                <additional-files value="sumo_traffic_lights.add.xml"/>
+        </input>
+        
+        <!-- 时间设置：仿真开始/结束时间以及时间步长 -->
+        <time>
+                <!-- begin: 仿真开始时间（秒），默认 0 -->
+                <begin value="0"/>
+
+                <!-- end: 仿真结束时间（秒）
+                         注意：若要无限运行可省略或设为较大值。 -->
+                <!-- <end value="3600000"/>  -->
+
+                <!-- step-length: 每个仿真步的持续时间（秒）
+                         较小的步长提高精度但增加计算量。常用 0.1 ~ 1.0 秒。 -->
+                <step-length value="1.0"/>  <!-- 1秒时间步 -->
+        </time>
+        
+        <!-- 处理/仿真物理与数值选项 -->
+        <processing>
+                <!-- step-method.ballistic: 是否启用 ballistic 步进方法（改进的车辆移动计算）
+                         true/false；启用可提高稳定性与某些交互行为的表现。 -->
+                <step-method.ballistic value="true"/>
+
+                <!-- lateral-resolution: 侧向分辨率（米），控制换道/侧向位置的精细程度
+                         更小的值表示更精细的车道横向划分（默认常见 0.25 米）。 -->
+                <lateral-resolution value="0.25"/>
+
+                <!-- ignore-accidents: 若为 true，仿真将忽略事故（注释掉表示未启用）
+                         通常用于调试或避免事故导致仿真卡死。 -->
+                <!-- <ignore-accidents value="true"/> -->
+
+                <!-- collision.action: 碰撞发生时的处理策略
+                         可选值：none（不采取动作）、remove（移除车辆）、teleport（传送）、warn 等。
+                         使用 none 意味着不自动移除或传送车辆，仿真会记录碰撞但不会强制处理。 -->
+                <collision.action value="none"/>
+        </processing>
+        
+        <!-- 报告/日志设置 -->
+        <report>
+                <!-- verbose: 是否输出详细日志（控制台信息）
+                         true 会输出较多调试信息，false 则较安静。 -->
+                <verbose value="true"/>
+
+                <!-- no-step-log: 是否禁止每步日志输出
+                         将其设为 true 可以避免每个仿真步的详细日志，从而减少 IO。 -->
+                <no-step-log value="true"/>
+
+                <!-- duration-log.disable: 禁用持续时间日志（性能统计）
+                         true 表示禁用，false 表示启用。 -->
+                <duration-log.disable value="true"/>
+        </report>
+        
+        <!-- 仅在 GUI 模式下生效的选项（命令行运行可忽略） -->
+        <gui_only>
+                <!-- start: 启动 SUMO-GUI 时是否立即开始仿真（true/false） -->
+                <start value="true"/>
+
+                <!-- delay: GUI 启动后的初始延迟（毫秒），用于观察初始状态或调试 -->
+                <delay value="100"/>
+        </gui_only>
+        
+        <!-- 输出文件配置：用于保存仿真结果与统计信息 -->
+        <output>
+                <!-- netstate-dump: 定期导出网络状态（车辆、车道占用等）
+                         若设置文件路径，会在仿真结束或按配置导出网络状态 XML。 -->
+                <netstate-dump value="output/netstate_dump.xml"/>
+
+                <!-- summary: 总体仿真摘要（运行后统计数据） -->
+                <summary value="output/simulation_summary.xml"/>
+
+                <!-- tripinfo-output: 每个行程的详细信息（出发/到达时间、等待时间、路线等）
+                         可用于评估旅行时间、停车与延误等。 -->
+                <tripinfo-output value="output/tripinfo.xml"/>
+        </output>
+        
+        <!-- 随机数种子：控制仿真中随机元素的可重复性 -->
+        <random_number>
+                <!-- seed: 整数种子；相同种子下随机过程可重复
+                         若想每次都不同，可以移除此项或使用不同的值。 -->
+                <seed value="42"/>
+        </random_number>
+</configuration>

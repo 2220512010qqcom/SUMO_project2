@@ -1,0 +1,8 @@
+anyio==4.12.1
+matplotlib==3.10.8
+mcp==1.26.0
+numpy==2.4.3
+pandas==3.0.1
+sumo_rl==1.4.5
+sumolib==1.15.0
+torch==2.9.1

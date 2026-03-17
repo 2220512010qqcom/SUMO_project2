@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- generated on 2026-03-02T13:07:09.392658+00:00 by Eclipse SUMO netedit 1.25.0
+<neteditConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/neteditConfiguration.xsd">
+
+    <input>
+        <sumocfg-file value="/home/lijiaxu_user/projects/traffic_signal_optimization/config/mySumoConfig.sumocfg"/>
+        <sumo-net-file value="/home/lijiaxu_user/projects/traffic_signal_optimization/config/mySumoConfig.net.xml"/>
+    </input>
+
+    <output>
+        <output-file value="/home/lijiaxu_user/projects/traffic_signal_optimization/config/mySumoConfig.net.xml"/>
+    </output>
+
+    <processing>
+        <offset.disable-normalization value="true"/>
+    </processing>
+
+    <junctions>
+        <no-turnarounds value="true"/>
+    </junctions>
+
+    <netedit>
+        <new-network value="false"/>
+    </netedit>
+
+</neteditConfiguration>
+-->
+
+<net version="1.20" junctionCornerDetail="5" limitTurnSpeed="5.50" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/net_file.xsd">
+
+    <location netOffset="0.00,0.00" convBoundary="-63.95,-36.17,43.51,46.45" origBoundary="10000000000.00,10000000000.00,-10000000000.00,-10000000000.00" projParameter="!"/>
+
+    <edge id="E0" from="J0" to="J1" priority="-1">
+        <lane id="E0_0" index="0" speed="13.89" length="107.10" shape="-63.60,25.63 43.50,24.90"/>
+    </edge>
+    <edge id="E1" from="J2" to="J3" priority="-1">
+        <lane id="E1_0" index="0" speed="13.89" length="105.27" shape="-63.97,-7.90 41.29,-9.01"/>
+    </edge>
+    <edge id="E2" from="J4" to="J5" priority="-1">
+        <lane id="E2_0" index="0" speed="13.89" length="76.43" shape="-38.87,43.82 -41.69,-32.56"/>
+    </edge>
+    <edge id="E3" from="J6" to="J7" priority="-1">
+        <lane id="E3_0" index="0" speed="13.89" length="82.63" shape="3.72,46.47 2.50,-36.15"/>
+    </edge>
+
+    <junction id="J0" type="dead_end" x="-63.59" y="27.23" incLanes="" intLanes="" shape="-63.59,27.23 -63.61,24.03"/>
+    <junction id="J1" type="dead_end" x="43.51" y="26.50" incLanes="E0_0" intLanes="" shape="43.49,23.30 43.51,26.50"/>
+    <junction id="J2" type="dead_end" x="-63.95" y="-6.30" incLanes="" intLanes="" shape="-63.95,-6.30 -63.98,-9.50"/>
+    <junction id="J3" type="dead_end" x="41.31" y="-7.41" incLanes="E1_0" intLanes="" shape="41.28,-10.61 41.31,-7.41"/>
+    <junction id="J4" type="dead_end" x="-37.27" y="43.76" incLanes="" intLanes="" shape="-37.27,43.76 -40.47,43.88"/>
+    <junction id="J5" type="dead_end" x="-40.09" y="-32.62" incLanes="E2_0" intLanes="" shape="-43.29,-32.50 -40.09,-32.62"/>
+    <junction id="J6" type="dead_end" x="5.32" y="46.45" incLanes="" intLanes="" shape="5.32,46.45 2.12,46.50"/>
+    <junction id="J7" type="dead_end" x="4.10" y="-36.17" incLanes="E3_0" intLanes="" shape="0.90,-36.12 4.10,-36.17"/>
+
+</net>

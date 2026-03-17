@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<routes>
+    <!-- 车辆类型定义（vType）
+         常用属性说明：
+         - id: 类型唯一标识符
+         - accel: 最大加速度，单位 m/s^2（车辆从静止到加速的能力）
+         - decel: 最大减速度（制动），单位 m/s^2
+         - sigma: 随机驾驶行为参数（越大越随机/拥挤）
+         - length: 车辆长度，单位 m
+         - maxSpeed: 车辆最高速度，单位 m/s（注：SUMO 常用 m/s）
+         - color: 可选，RGB 颜色值，用逗号分隔（用于可视化）
+    -->
+    <vType id="car" accel="1.0" decel="5.0" sigma="0.5" length="5.0" maxSpeed="13.89"/>
+    <vType id="emergency" accel="2.0" decel="7.5" sigma="0.3" length="6.0" maxSpeed="19.44" color="1,0,0"/>
+
+    <!-- 流（flow）定义说明
+         常用属性：
+         - id: 流的唯一标识
+         - type: 指定使用的 vType id
+         - begin: 流开始时间，单位 秒
+         - end: 流结束时间，单位 秒
+         - probability: 在生成窗口内每次可能生成车辆的概率（0-1），通常表示每次时间步或每秒的生成概率，具体依赖 SUMO 配置
+         - period: 固定周期生成车辆，单位 秒（与 probability 二选其一）
+         - from: 起始边（edge）ID（车辆进入路网的边）
+         - to: 目标边（edge）ID（车辆离开路网或行驶至的边）
+         备注：begin/end 决定流的生效时间段；probability 与 period 不应同时使用（会产生冲突）。
+    -->
+
+    <!-- 东西方向主流：从 west1_to_1 到 3_to_east1，普通私家车 -->
+    <flow id="west_to_east" type="car" begin="0" end="360000" probability="0.1" from="west1_to_1" to="3_to_east1"/>
+    <!-- 东向西方向主流 -->
+    <flow id="east_to_west" type="car" begin="0" end="360000" probability="0.1" from="east1_to_3" to="1_to_west1"/>
+
+    <!-- 南北方向主流：从 south1_to_1 到 2_to_north1 -->
+    <flow id="south_to_north" type="car" begin="0" end="360000" probability="0.1" from="south1_to_1" to="2_to_north1"/>
+    <!-- 北向南方向主流 -->
+    <flow id="north_to_south" type="car" begin="0" end="360000" probability="0.1" from="north1_to_2" to="1_to_south1"/>
+
+    <!-- 交叉方向（转向/斜向流量），概率较低表示转向车辆较少 -->
+    <flow id="west_to_north" type="car" begin="0" end="360000" probability="0.05" from="west1_to_1" to="2_to_north1"/>
+    <flow id="north_to_east" type="car" begin="0" end="360000" probability="0.05" from="north1_to_2" to="3_to_east1"/>
+    <flow id="south_to_east" type="car" begin="0" end="360000" probability="0.05" from="south1_to_1" to="3_to_east1"/>
+    <flow id="west_to_south" type="car" begin="0" end="360000" probability="0.05" from="west1_to_1" to="1_to_south1"/>
+
+    <!-- 紧急车辆（emergency）说明：
+         - 使用 type="emergency" 以区别于普通车辆（更高 accel、maxSpeed 等）
+         - 使用 period 属性每隔固定秒数生成一辆紧急车（更可控的生成模式）
+         - begin/end 指定紧急车生成的时间窗口
+    -->
+    <flow id="emergency_west_east" type="emergency" begin="100" end="360000" period="300" from="west1_to_1" to="3_to_east1"/>
+    <flow id="emergency_north_south" type="emergency" begin="200" end="360000" period="300" from="north1_to_2" to="1_to_south1"/>
+</routes>

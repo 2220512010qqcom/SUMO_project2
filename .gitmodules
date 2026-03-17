@@ -1,0 +1,3 @@
+[submodule "sumo-mcp"]
+	path = sumo-mcp
+	url = https://github.com/XRDS76354/SUMO-MCP-Server.git

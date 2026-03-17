@@ -1,0 +1,41 @@
+model:
+  name: "DLEP-MARL"
+  # state_dim: 256
+  # state_dim: 146
+  state_dim: 145
+  action_dim: 4
+  hidden_layers: [256, 128, 64]
+  learning_rate: 0.0001
+  gamma: 0.7
+  epsilon_start: 1.0
+  epsilon_end: 0.01
+  epsilon_decay: 0.995
+
+action_space:  # 这里应该定义动作空间
+  'duration_options': [20, 30, 40, 50]
+  'type': 'discrete'
+  'num_actions': 4
+replay_buffer:
+  immediate_buffer_size: 10000
+  target_buffer_size: 50000
+  min_buffer_size: 400
+  batch_size: 32
+
+training:
+  episodes: 100
+  steps_per_episode: 1000
+  target_update_frequency: 100
+  save_frequency: 10
+
+environment:
+  grid_height: 8
+  grid_width: 8
+  cell_size: 10
+  max_waiting_time: 300
+  time_step: 1.0
+
+reward:
+  vehicle_weight: 0.5
+  pedestrian_weight: 0.3
+  emergency_weight: 0.2
+  max_negative_reward: -100
