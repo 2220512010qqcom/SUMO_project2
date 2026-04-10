@@ -36,6 +36,14 @@ class myLogger():
         log_file_path = os.path.join(self.plot_dir, f"agent_{agent_id}_state_log.txt")
         with open(log_file_path, 'a') as log_file:
             log_file.write(f"Episode {agent_id}: State: {state}\n")
+    
+    def log_agent_duration(self, agent_id, duration):
+        """记录智能体的持续时间信息"""
+        log_file_path = os.path.join(self.plot_dir, f"agent_{agent_id}_duration_log.txt")
+        with open(log_file_path, 'a') as log_file:
+            log_file.write(f"Episode {agent_id}: Duration: {duration}\n")
+
+    
 
 
     def plot_agent_rewards(self, agent_id, reward_list):    
