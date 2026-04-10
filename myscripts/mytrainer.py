@@ -23,7 +23,7 @@ class mytrainer:
     def __init__(self):
         self.episode = 0
         self.max_episodes = 3000          # 最大训练回合数
-        self.step_per_episode = 3600     # 每个回合的最大步数
+        self.step_per_episode = 3000     # 每个回合的最大步数
 
         self.plot_dir = './outputs/output1'
         self.sumo_controller = SumoController()     #初始化一个sumo控制器
@@ -43,7 +43,7 @@ class mytrainer:
             controlled_links = self.sumo_controller.get_controlled_lanes(tls_id)   # [[NS],[EW]]
             # 计算输入维度
             num_links = len(controlled_links[0]) + len(controlled_links[1])
-            input_dim = 32  # 每条车道的状态信息维度
+            input_dim = 26  # 每条车道的状态信息维度
             self.agent_list.append(myAgent(tls_id,input_dim))
             self.agent_list[-1].set_controlled_lanes(controlled_links)
             self.agent_list[-1].init_RV_list(num_links)
@@ -279,8 +279,10 @@ class mytrainer:
 
     def get_selected_agents_action(self,selected_agent_indexs,selected_agent_states):
         selected_agent_actions = []
-        for i in selected_agent_indexs:
-            action = self.agent_list[i].select_action(torch.tensor(selected_agent_states, dtype=torch.float32))
+        selected_agent_num = len(selected_agent_indexs)
+        for i in range(selected_agent_num):
+            index = selected_agent_indexs[i]
+            action = self.agent_list[index].select_action(torch.tensor(selected_agent_states[i], dtype=torch.float32))
             selected_agent_actions.append(action)
         return selected_agent_actions
 # 定义main函数 
