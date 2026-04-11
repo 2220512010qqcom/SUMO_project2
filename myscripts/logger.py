@@ -6,6 +6,7 @@ from matplotlib import pyplot as plt
 class myLogger():
     def __init__(self, log_file_path):
         self.plot_dir = log_file_path
+        os.makedirs(self.plot_dir, exist_ok=True)  # 确保日志目录存在
         self.all_agent_reward_dict = {}  # 存储所有智能体的奖励数据，格式为{agent_id: [reward1, reward2, ...], ...}
 
     def intialize_agent_num(self, agent_list):
@@ -169,5 +170,160 @@ class myLogger():
         plt.savefig(os.path.join(self.plot_dir, 'training_vehicle_average_wait_time_curve.png'), dpi=150)
         plt.close()  # 防止内存泄漏
 
+    # ==================== 新增可视化方法 ====================
     
-    
+    def plot_queue_length_heatmap(self, queue_data, save_name='queue_length_heatmap.png'):
+        """
+        绘制队列长度热力图
+        queue_data: 格式 {'agent_id': {'NS': [列表], 'EW': [列表]}}
+        """
+        import numpy as np
+        
+        fig, axes = plt.subplots(1, len(queue_data), figsize=(6*len(queue_data), 5))
+        if len(queue_data) == 1:
+            axes = [axes]
+        
+        for idx, (agent_id, data) in enumerate(queue_data.items()):
+            ns_queues = np.array(data['NS'])
+            ew_queues = np.array(data['EW'])
+            
+            # 创建热力图数据
+            heatmap_data = np.vstack([ns_queues, ew_queues])
+            
+            im = axes[idx].imshow(heatmap_data, aspect='auto', cmap='YlOrRd', interpolation='nearest')
+            axes[idx].set_yticks([0, 1])
+            axes[idx].set_yticklabels(['North-South', 'East-West'])
+            axes[idx].set_xlabel('Time Step')
+            axes[idx].set_title(f'Agent {agent_id} Queue Length')
+            plt.colorbar(im, ax=axes[idx], label='Queue Length')
+        
+        plt.tight_layout()
+        plt.savefig(os.path.join(self.plot_dir, save_name), dpi=150, bbox_inches='tight')
+        plt.close()
+
+    def plot_queue_length_curve(self, queue_data, save_name='queue_length_curve.png'):
+        """
+        绘制队列长度曲线
+        """
+        import numpy as np
+        
+        fig, ax = plt.subplots(figsize=(12, 6))
+        colors = ['blue', 'green', 'red', 'purple']
+        
+        for idx, (agent_id, data) in enumerate(queue_data.items()):
+            time_steps = np.arange(len(data['NS']))
+            color = colors[idx % len(colors)]
+            ax.plot(time_steps, data['NS'], '--', color=color, alpha=0.7, label=f'Agent {agent_id} NS')
+            ax.plot(time_steps, data['EW'], '-', color=color, alpha=0.7, label=f'Agent {agent_id} EW')
+        
+        ax.set_xlabel('Time Step')
+        ax.set_ylabel('Queue Length (vehicles)')
+        ax.set_title('Queue Length Over Time')
+        ax.legend(loc='upper right')
+        ax.grid(True, alpha=0.3)
+        plt.tight_layout()
+        plt.savefig(os.path.join(self.plot_dir, save_name), dpi=150, bbox_inches='tight')
+        plt.close()
+
+    def plot_waiting_time_curve(self, waiting_data, save_name='waiting_time_curve.png'):
+        """
+        绘制等待时间曲线
+        """
+        import numpy as np
+        
+        fig, ax = plt.subplots(figsize=(12, 6))
+        colors = ['blue', 'green', 'red', 'purple']
+        
+        for idx, (agent_id, data) in enumerate(waiting_data.items()):
+            time_steps = np.arange(len(data['NS']))
+            color = colors[idx % len(colors)]
+            ax.plot(time_steps, data['NS'], '--', color=color, alpha=0.7, label=f'Agent {agent_id} NS')
+            ax.plot(time_steps, data['EW'], '-', color=color, alpha=0.7, label=f'Agent {agent_id} EW')
+        
+        ax.set_xlabel('Time Step')
+        ax.set_ylabel('Waiting Time (seconds)')
+        ax.set_title('Vehicle Waiting Time Over Time')
+        ax.legend(loc='upper right')
+        ax.grid(True, alpha=0.3)
+        plt.tight_layout()
+        plt.savefig(os.path.join(self.plot_dir, save_name), dpi=150, bbox_inches='tight')
+        plt.close()
+
+    def plot_waiting_time_boxplot(self, waiting_data, save_name='waiting_time_boxplot.png'):
+        """
+        绘制等待时间箱线图
+        """
+        import numpy as np
+        
+        fig, ax = plt.subplots(figsize=(10, 6))
+        
+        data_to_plot = []
+        labels = []
+        
+        for agent_id, data in waiting_data.items():
+            if len(data['NS']) > 0:
+                data_to_plot.append(data['NS'])
+                labels.append(f'Agent {agent_id} NS')
+                data_to_plot.append(data['EW'])
+                labels.append(f'Agent {agent_id} EW')
+        
+        bp = ax.boxplot(data_to_plot, labels=labels, patch_artist=True)
+        
+        # 设置颜色
+        colors = ['lightblue', 'lightgreen', 'lightcoral', 'lightyellow', 'lightpink', 'lightskyblue']
+        for patch, color in zip(bp['boxes'], colors[:len(data_to_plot)]):
+            patch.set_facecolor(color)
+        
+        ax.set_ylabel('Waiting Time (seconds)')
+        ax.set_title('Waiting Time Distribution')
+        ax.tick_params(axis='x', rotation=45)
+        ax.grid(True, alpha=0.3, axis='y')
+        
+        plt.tight_layout()
+        plt.savefig(os.path.join(self.plot_dir, save_name), dpi=150, bbox_inches='tight')
+        plt.close()
+
+    def plot_comparison_bar(self, queue_data, waiting_data, save_name='comparison_bar.png'):
+        """
+        绘制对比柱状图
+        """
+        import numpy as np
+        
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
+        
+        agents = list(queue_data.keys())
+        
+        # 平均队列长度
+        avg_ns_queue = [np.mean(queue_data[a]['NS']) for a in agents]
+        avg_ew_queue = [np.mean(queue_data[a]['EW']) for a in agents]
+        
+        x = np.arange(len(agents))
+        width = 0.35
+        
+        ax1.bar(x - width/2, avg_ns_queue, width, label='North-South', color='steelblue')
+        ax1.bar(x + width/2, avg_ew_queue, width, label='East-West', color='coral')
+        ax1.set_xlabel('Agent')
+        ax1.set_ylabel('Average Queue Length')
+        ax1.set_title('Average Queue Length')
+        ax1.set_xticks(x)
+        ax1.set_xticklabels([f'Agent {a}' for a in agents])
+        ax1.legend()
+        ax1.grid(True, alpha=0.3, axis='y')
+        
+        # 平均等待时间
+        avg_ns_wait = [np.mean(waiting_data[a]['NS']) for a in agents]
+        avg_ew_wait = [np.mean(waiting_data[a]['EW']) for a in agents]
+        
+        ax2.bar(x - width/2, avg_ns_wait, width, label='North-South', color='steelblue')
+        ax2.bar(x + width/2, avg_ew_wait, width, label='East-West', color='coral')
+        ax2.set_xlabel('Agent')
+        ax2.set_ylabel('Average Waiting Time (s)')
+        ax2.set_title('Average Waiting Time')
+        ax2.set_xticks(x)
+        ax2.set_xticklabels([f'Agent {a}' for a in agents])
+        ax2.legend()
+        ax2.grid(True, alpha=0.3, axis='y')
+        
+        plt.tight_layout()
+        plt.savefig(os.path.join(self.plot_dir, save_name), dpi=150, bbox_inches='tight')
+        plt.close()

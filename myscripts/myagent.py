@@ -108,8 +108,25 @@ class myAgent:
     # =============================== 经验回放缓冲区相关 ===============================
     def store_experience(self, experience):
         """存储经验到即时缓冲区"""
-        # （状态，动作，奖励，下一个状态）
-        self.immediate_buffer.append(experience)
+        state, action, reward, next_state = experience
+    
+        # 确保状态是列表格式（统一格式）
+        def to_list(x):
+            if isinstance(x, torch.Tensor):
+                return x.cpu().tolist()
+            elif isinstance(x, list):
+                return x
+            elif hasattr(x, 'tolist'):
+                return x.tolist()
+            else:
+                return x
+    
+        state = to_list(state)
+        next_state = to_list(next_state)
+    
+        self.immediate_buffer.append((state, action, reward, next_state))
+
+        #之前出现的报错可能是因为状态数据格式不统一导致的，这里添加了一个to_list函数来确保状态数据被转换为列表格式，避免了类型错误。
 
     def immiediate_buffer_length(self):
         return len(self.immediate_buffer)
@@ -140,10 +157,29 @@ class myAgent:
         # 随机采样经验
         sampled_experiences = random.sample(self.immediate_buffer, self.train_experience_number)
         # 形成矩阵
-        states = torch.tensor([exp[0] for exp in sampled_experiences], dtype=torch.float32)
-        actions = torch.tensor([exp[1] for exp in sampled_experiences], dtype=torch.int64).unsqueeze(1)
-        rewards = torch.tensor([exp[2] for exp in sampled_experiences], dtype=torch.float32).unsqueeze(1)
-        next_states = torch.tensor([exp[3] for exp in sampled_experiences], dtype=torch.float32)
+        #添加了一段代码来确保状态数据被转换为列表格式，避免了类型错误。
+        states = []
+        actions = []
+        rewards = []
+        next_states = []
+    
+        for exp in sampled_experiences:
+            s, a, r, ns = exp
+            # 确保是列表格式
+            if isinstance(s, torch.Tensor):
+                s = s.cpu().tolist()
+            if isinstance(ns, torch.Tensor):
+                ns = ns.cpu().tolist()
+            states.append(s)
+            actions.append(a)
+            rewards.append(r)
+            next_states.append(ns)
+    
+        # 形成矩阵
+        states = torch.tensor(states, dtype=torch.float32)
+        actions = torch.tensor(actions, dtype=torch.int64).unsqueeze(1)
+        rewards = torch.tensor(rewards, dtype=torch.float32).unsqueeze(1)
+        next_states = torch.tensor(next_states, dtype=torch.float32)
         # 计算当前Q值
         current_q_values = self.behavior(states).gather(1, actions)
         # 计算目标Q值

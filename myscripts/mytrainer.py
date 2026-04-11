@@ -22,10 +22,10 @@ class mytrainer:
 
     def __init__(self):
         self.episode = 0
-        self.max_episodes = 3000          # 最大训练回合数
-        self.step_per_episode = 3000     # 每个回合的最大步数
+        self.max_episodes = 50          # 最大训练回合数
+        self.step_per_episode = 600     # 每个回合的最大步数
 
-        self.plot_dir = './outputs/output1'
+        self.plot_dir = './outputs/output2'
         self.sumo_controller = SumoController()     #初始化一个sumo控制器
         self.sumo_controller.start_sumo()
         self.lane_state_num = 2         # 每个车道有多少状态信息要计算
@@ -267,15 +267,24 @@ class mytrainer:
         '''根据各个分项奖励，加权形成智能体奖励'''
         # TODO 增加RP RE 两个分项
         return selected_agent_RV_rewards
-    
-    def store_experience(self,selected_agent_indexs, selected_agent_states, selected_agent_rewards, selected_agent_actions):
+
+    #TODO:增加一个函数，专门用来计算RP奖励和RE奖励，输入是智能体的RV列表和之前存储的RP RE列表，输出是当前的RP RE奖励值，然后在get_selected_agents_reward函数中进行加权计算得到最终奖励值
+    def store_experience(self, selected_agent_indexs, selected_agent_states, selected_agent_rewards, selected_agent_actions):
         selected_agent_num = len(selected_agent_indexs)
         for i in range(selected_agent_num):
             index = selected_agent_indexs[i]
-            experience = (self.agent_list[index].last_state,self.agent_list[index].last_action, selected_agent_rewards[i], selected_agent_states[i])   #index 用于指定更新的智能体，下标i负责取出对应的数据
-            self.agent_list[index].store_experience(experience)
-            self.agent_list[index].last_state = selected_agent_states[i]
-            self.agent_list[index].last_action = selected_agent_actions[i]
+            agent = self.agent_list[index]
+        
+            # 第一次执行时跳过（没有上一步的状态）
+            if agent.last_state is None:
+                agent.last_state = selected_agent_states[i]
+                agent.last_action = selected_agent_actions[i]
+                continue
+        
+            experience = (agent.last_state, agent.last_action, selected_agent_rewards[i], selected_agent_states[i])
+            agent.store_experience(experience)
+            agent.last_state = selected_agent_states[i]
+            agent.last_action = selected_agent_actions[i]
 
     def get_selected_agents_action(self,selected_agent_indexs,selected_agent_states):
         selected_agent_actions = []
@@ -285,17 +294,116 @@ class mytrainer:
             action = self.agent_list[index].select_action(torch.tensor(selected_agent_states[i], dtype=torch.float32))
             selected_agent_actions.append(action)
         return selected_agent_actions
+    
+    #新增方法收集数据以便于可视化
+    def collect_traffic_data(self):
+        """收集当前交通数据用于可视化"""
+        queue_data = {}
+        waiting_data = {}
+        
+        for agent in self.agent_list:
+            ns_queues = 0
+            ew_queues = 0
+            ns_waiting = 0
+            ew_waiting = 0
+            ns_count = 0
+            ew_count = 0
+            
+            # 收集NS方向数据
+            for lane in agent.controlled_lanes[agent.NS_lanes_index]:
+                state = self.sumo_controller.get_vehicles_in_area(lane)
+                ns_queues += state["vehicle_count"]
+                ns_waiting += state["total_waiting_time"]
+                ns_count += 1
+            
+            # 收集EW方向数据
+            for lane in agent.controlled_lanes[agent.EW_lanes_index]:
+                state = self.sumo_controller.get_vehicles_in_area(lane)
+                ew_queues += state["vehicle_count"]
+                ew_waiting += state["total_waiting_time"]
+                ew_count += 1
+            
+            queue_data[agent.id] = {
+                'NS': ns_queues,
+                'EW': ew_queues
+            }
+            waiting_data[agent.id] = {
+                'NS': ns_waiting / ns_count if ns_count > 0 else 0,
+                'EW': ew_waiting / ew_count if ew_count > 0 else 0
+            }
+        
+        return queue_data, waiting_data
+
+    def run_visualization(self):
+        """运行可视化数据收集"""
+        print("="*60)
+        print("开始收集可视化数据...")
+        print(f"总步数: {self.step_per_episode}")
+        print("="*60)
+        
+        # 重置仿真
+        self.sumo_controller.reset_simulation()
+        
+        # 初始化数据存储
+        queue_history = {agent.id: {'NS': [], 'EW': []} for agent in self.agent_list}
+        waiting_history = {agent.id: {'NS': [], 'EW': []} for agent in self.agent_list}
+        
+        # 收集一个完整episode的数据
+        for step in range(self.step_per_episode):
+            # 执行一步训练
+            self.train_step()
+            
+            # 收集当前步的数据
+            queue_data, waiting_data = self.collect_traffic_data()
+            
+            for agent_id in queue_data:
+                queue_history[agent_id]['NS'].append(queue_data[agent_id]['NS'])
+                queue_history[agent_id]['EW'].append(queue_data[agent_id]['EW'])
+                waiting_history[agent_id]['NS'].append(waiting_data[agent_id]['NS'])
+                waiting_history[agent_id]['EW'].append(waiting_data[agent_id]['EW'])
+            
+            # 打印进度
+            if (step + 1) % 100 == 0:
+                print(f"进度: {step + 1}/{self.step_per_episode} ({((step+1)/self.step_per_episode)*100:.1f}%)")
+        
+        print("\n数据收集完成！正在生成图表...")
+        
+        # 生成图表
+        self.logger.plot_queue_length_heatmap(queue_history)
+        self.logger.plot_queue_length_curve(queue_history)
+        self.logger.plot_waiting_time_curve(waiting_history)
+        self.logger.plot_waiting_time_boxplot(waiting_history)
+        self.logger.plot_comparison_bar(queue_history, waiting_history)
+        
+        print(f"\n所有图表已保存到: {self.plot_dir}")
+        print("生成的文件:")
+        print("  - queue_length_heatmap.png")
+        print("  - queue_length_curve.png")
+        print("  - waiting_time_curve.png")
+        print("  - waiting_time_boxplot.png")
+        print("  - comparison_bar.png")
+        
+        return queue_history, waiting_history
+    
+
 # 定义main函数 
 def main():
     trainer = mytrainer()
     logger = myLogger(trainer.plot_dir)
     trainer.set_logger(logger)
+    
     print("*" * 60)
-    print("训练开始！")
-    trainer.train()
+    print("快速可视化模式")
+    print(f"每回合步数: {trainer.step_per_episode}")
     print("*" * 60)
-    print("训练完毕！")
-    return
+    
+    # 运行可视化数据收集
+    trainer.run_visualization()
+    
+    print("\n" + "*" * 60)
+    print("完成！请查看输出目录中的图片文件")
+    print(f"输出目录: {trainer.plot_dir}")
+    print("*" * 60)
     
 if __name__ == '__main__':
     main()

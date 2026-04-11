@@ -5,8 +5,8 @@ from myscripts.myagent import myAgent
 # TODO：实现根据智能体查询车道数据，并进行模糊编码
 class SumoController:
     def __init__(self):
-        self.sumo_binary = "sumo-gui" # 使用图形化界面
-        # self.sumo_binary = "sumo"  # 使用无图形化界面333
+        # self.sumo_binary = "sumo-gui" # 使用图形化界面
+        self.sumo_binary = "sumo"  # 使用无图形化界面333
         # self.config_file = "./config/sumo_config.sumocfg"     # 使用模块化方式启动时的配置路径
         self.config_file = "./config/5.sumocfg"     # 使用模块化方式启动时的配置路径
         # self.config_file = "../config/sumo_config.sumocfg"       # 使用文件方式启动时的配置路径
