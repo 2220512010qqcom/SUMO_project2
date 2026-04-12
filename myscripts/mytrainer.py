@@ -14,6 +14,7 @@ import os
 import random
 from matplotlib import pyplot as plt
 import torch
+import numpy as np
 from myscripts.sumoController import SumoController
 from myscripts.myagent import myAgent
 from myscripts.logger import myLogger
@@ -22,8 +23,8 @@ class mytrainer:
 
     def __init__(self):
         self.episode = 0
-        self.max_episodes = 50          # 最大训练回合数
-        self.step_per_episode = 600     # 每个回合的最大步数
+        self.max_episodes = 10          # 最大训练回合数
+        self.step_per_episode = 200     # 每个回合的最大步数
 
         self.plot_dir = './outputs/output2'
         self.sumo_controller = SumoController()     #初始化一个sumo控制器
@@ -335,55 +336,96 @@ class mytrainer:
         return queue_data, waiting_data
 
     def run_visualization(self):
-        """运行可视化数据收集"""
+        """运行可视化数据收集 - 每回合统计一次，带预热"""
+    
         print("="*60)
         print("开始收集可视化数据...")
-        print(f"总步数: {self.step_per_episode}")
+        print(f"总回合数: {self.max_episodes}")
+        print(f"每回合步数: {self.step_per_episode}")
         print("="*60)
+    
+
+         # ===== 预热：让环境空转，产生车辆 =====
+        print("\n预热阶段: 让环境运行产生车辆...")
+        self.sumo_controller.reset_simulation()
+        warmup_steps = 300  # 空转300步
+        for step in range(warmup_steps):
+            self.sumo_controller.step_sumo()
+        print("预热完成！\n")
+
+
+        # ===== 正式收集数据：每个回合统计一次 =====
+        for episode in range(self.max_episodes):
+            self.episode = episode + 1
+            print(f"\n--- 回合 {self.episode}/{self.max_episodes} ---")
         
         # 重置仿真
-        self.sumo_controller.reset_simulation()
+            self.sumo_controller.reset_simulation()
         
-        # 初始化数据存储
-        queue_history = {agent.id: {'NS': [], 'EW': []} for agent in self.agent_list}
-        waiting_history = {agent.id: {'NS': [], 'EW': []} for agent in self.agent_list}
+        # 每个回合开始前短暂预热
+            for _ in range(100):
+                self.sumo_controller.step_sumo()
         
-        # 收集一个完整episode的数据
-        for step in range(self.step_per_episode):
+        # 收集本回合的步数据
+            step_queues = {agent.id: {'NS': [], 'EW': []} for agent in self.agent_list}
+            step_waitings = {agent.id: {'NS': [], 'EW': []} for agent in self.agent_list}
+        
+            for step in range(self.step_per_episode):
             # 执行一步训练
-            self.train_step()
+                self.train_step()
             
             # 收集当前步的数据
-            queue_data, waiting_data = self.collect_traffic_data()
+                queue_data, waiting_data = self.collect_traffic_data()
             
-            for agent_id in queue_data:
-                queue_history[agent_id]['NS'].append(queue_data[agent_id]['NS'])
-                queue_history[agent_id]['EW'].append(queue_data[agent_id]['EW'])
-                waiting_history[agent_id]['NS'].append(waiting_data[agent_id]['NS'])
-                waiting_history[agent_id]['EW'].append(waiting_data[agent_id]['EW'])
+                for agent_id in queue_data:
+                    step_queues[agent_id]['NS'].append(queue_data[agent_id]['NS'])
+                    step_queues[agent_id]['EW'].append(queue_data[agent_id]['EW'])
+                    step_waitings[agent_id]['NS'].append(waiting_data[agent_id]['NS'])
+                    step_waitings[agent_id]['EW'].append(waiting_data[agent_id]['EW'])
             
             # 打印进度
-            if (step + 1) % 100 == 0:
-                print(f"进度: {step + 1}/{self.step_per_episode} ({((step+1)/self.step_per_episode)*100:.1f}%)")
+                if (step + 1) % 200 == 0:
+                    print(f"  步数进度: {step + 1}/{self.step_per_episode}")
         
+        # ===== 计算本回合的平均值（合并NS和EW方向）=====
+            for agent_id in step_queues:
+            # 计算NS和EW的平均队列长度，再取整体平均
+                avg_ns_queue = np.mean(step_queues[agent_id]['NS']) if step_queues[agent_id]['NS'] else 0
+                avg_ew_queue = np.mean(step_queues[agent_id]['EW']) if step_queues[agent_id]['EW'] else 0
+                avg_queue = (avg_ns_queue + avg_ew_queue) / 2
+            
+            # 计算NS和EW的平均等待时间
+                avg_ns_wait = np.mean(step_waitings[agent_id]['NS']) if step_waitings[agent_id]['NS'] else 0
+                avg_ew_wait = np.mean(step_waitings[agent_id]['EW']) if step_waitings[agent_id]['EW'] else 0
+                avg_waiting = (avg_ns_wait + avg_ew_wait) / 2
+            
+            # 记录到logger
+                self.logger.log_episode_metrics(agent_id, avg_queue, avg_waiting)
+            
+            # 记录奖励（从智能体获取）
+                for agent in self.agent_list:
+                    if agent.id == agent_id and agent.reward_list:
+                        last_reward = agent.reward_list[-1] if agent.reward_list else 0
+                        self.logger.log_agent_rewards(agent, last_reward)
+        
+            print(f"  回合完成！")
+    
+    # ===== 生成所有图表 =====
         print("\n数据收集完成！正在生成图表...")
-        
-        # 生成图表
-        self.logger.plot_queue_length_heatmap(queue_history)
-        self.logger.plot_queue_length_curve(queue_history)
-        self.logger.plot_waiting_time_curve(waiting_history)
-        self.logger.plot_waiting_time_boxplot(waiting_history)
-        self.logger.plot_comparison_bar(queue_history, waiting_history)
-        
+        self.logger.finalize()
+    
         print(f"\n所有图表已保存到: {self.plot_dir}")
         print("生成的文件:")
-        print("  - queue_length_heatmap.png")
-        print("  - queue_length_curve.png")
-        print("  - waiting_time_curve.png")
-        print("  - waiting_time_boxplot.png")
-        print("  - comparison_bar.png")
-        
-        return queue_history, waiting_history
+        print("  - agent_*_reward_curve.png (每个智能体的奖励曲线)")
+        print("  - agent_*_queue_length_curve.png (每个智能体的队列长度曲线)")
+        print("  - agent_*_waiting_time_curve.png (每个智能体的等待时间曲线)")
+        print("  - agent_*_combined_metrics.png (每个智能体的综合指标图)")
+        print("  - agent_*_metrics.csv (每个智能体的数据CSV)")
+        print("  - all_agents_reward_comparison.png (所有智能体奖励对比)")
+        print("  - all_agents_queue_comparison.png (所有智能体队列对比)")
+        print("  - all_agents_waiting_comparison.png (所有智能体等待时间对比)")
+    
+        return self.logger.agent_queue_data, self.logger.agent_waiting_data
     
 
 # 定义main函数 
