@@ -23,7 +23,7 @@ class mytrainer:
 
     def __init__(self):
         self.episode = 0
-        self.max_episodes = 10          # 最大训练回合数
+        self.max_episodes = 50          # 最大训练回合数
         self.step_per_episode = 200     # 每个回合的最大步数
 
         self.plot_dir = './outputs/output2'
