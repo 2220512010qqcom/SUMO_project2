@@ -89,6 +89,9 @@ class mytrainer:
         selected_agent_RV_rewards = self.get_selected_agents_RV_reward(selected_agent_indexs,selected_agent_cur_RV_list)
         self.update_RV_list(selected_agent_indexs,selected_agent_cur_RV_list)  # 更新智能体的RV列表
         selected_agent_rewards = self.get_selected_agents_reward(selected_agent_RV_rewards)  # 计算总体奖励值
+        #添加奖励记录
+        for i, idx in enumerate(selected_agent_indexs):
+            self.agent_list[idx].add_reward(selected_agent_rewards[i])
         self.store_experience(selected_agent_indexs, selected_agent_states, selected_agent_rewards, selected_agent_actions)  # 将经验存储到对应智能体的即时缓冲区中
         self.change_light(selected_agent_indexs,selected_agent_states,selected_agent_actions)  # 更新智能体的变灯时间,并顺便将经验保存到智能体的存储空间
         self.sumo_controller.step_sumo()        #  进行下一步仿真模拟
