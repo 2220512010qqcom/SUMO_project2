@@ -23,8 +23,8 @@ class mytrainer:
 
     def __init__(self):
         self.episode = 0
-        self.max_episodes = 50          # 最大训练回合数
-        self.step_per_episode = 200     # 每个回合的最大步数
+        self.max_episodes = 100          # 最大训练回合数
+        self.step_per_episode = 800     # 每个回合的最大步数
 
         self.plot_dir = './outputs/output2'
         self.sumo_controller = SumoController()     #初始化一个sumo控制器
@@ -81,7 +81,7 @@ class mytrainer:
         selected_agent_indexs = self.step_to_next_light_change()  # 进行仿真直到下一个智能体需要变灯
         # 获取需要变灯智能体的状态信息state 一维数组 
         selected_agent_states = self.get_selected_agents_state(selected_agent_indexs)
-        print(selected_agent_states)
+        # print(selected_agent_states)
         selected_agent_actions = self.get_selected_agents_action(selected_agent_indexs,selected_agent_states)
         selected_agent_cur_RV_list = self.get_selected_agents_RV_list(selected_agent_indexs)
         # selected_agent_cur_RP_list = self.get_selected_agents_RV_list(selected_agent_indexs) TODO
@@ -89,14 +89,16 @@ class mytrainer:
         selected_agent_RV_rewards = self.get_selected_agents_RV_reward(selected_agent_indexs,selected_agent_cur_RV_list)
         self.update_RV_list(selected_agent_indexs,selected_agent_cur_RV_list)  # 更新智能体的RV列表
         selected_agent_rewards = self.get_selected_agents_reward(selected_agent_RV_rewards)  # 计算总体奖励值
+        for i, idx in enumerate(selected_agent_indexs):
+            self.agent_list[idx].add_reward(selected_agent_rewards[i])
         self.store_experience(selected_agent_indexs, selected_agent_states, selected_agent_rewards, selected_agent_actions)  # 将经验存储到对应智能体的即时缓冲区中
         self.change_light(selected_agent_indexs,selected_agent_states,selected_agent_actions)  # 更新智能体的变灯时间,并顺便将经验保存到智能体的存储空间
         self.sumo_controller.step_sumo()        #  进行下一步仿真模拟
         for agent in self.agent_list:
             agent.update_behavior_network()
-            print("参数更新完成！")
-        if selected_agent_indexs[0] == 0:
-            print("智能体1奖励：",selected_agent_rewards[0])
+            # print("参数更新完成！")
+        # if selected_agent_indexs[0] == 0:
+        #     print("智能体1奖励：",selected_agent_rewards[0])
 
     def step_to_next_light_change(self):
         '''进行仿真直到下一个智能体需要变灯，返回此次需要变灯的智能体下标数组'''
@@ -249,8 +251,9 @@ class mytrainer:
                 VT_max_cur = max(VT_max_cur,cur_RV_list[j][0])
                 if VN_diff_sum == 0:
                     VN_diff_sum = 1
-                RV_reward += VT_diff_sum / VN_diff_sum
-            RV_reward += VT_max_cur - VT_max_last     
+            RV_reward += VT_diff_sum / VN_diff_sum    ###  没啥用？
+            RV_reward += VT_max_last - VT_max_cur  
+            RV_reward = - VT_max_cur   ###  尝试用等待时间代替奖励函数   
             RV_reward_list.append(RV_reward)
         return RV_reward_list
     
@@ -384,8 +387,15 @@ class mytrainer:
                     step_waitings[agent_id]['EW'].append(waiting_data[agent_id]['EW'])
             
             # 打印进度
-                if (step + 1) % 200 == 0:
+                if (step + 1) % 400 == 0:
                     print(f"  步数进度: {step + 1}/{self.step_per_episode}")
+                    # 每个回合结束后，可以在这里进行经验回放和网络更新
+                    for agent in self.agent_list:
+                        print(f"Agent {agent.id} Episode {self.episode} Immediate Buffer Size: {len(agent.immediate_buffer)}")
+                        agent.reset_all()
+                        agent.update_epsilon()
+                        agent.update_target_network()
+                        print(f"当前探索率为{agent.epsilon}")
         
         # ===== 计算本回合的平均值（合并NS和EW方向）=====
             for agent_id in step_queues:
@@ -407,12 +417,19 @@ class mytrainer:
                     if agent.id == agent_id and agent.reward_list:
                         last_reward = agent.reward_list[-1] if agent.reward_list else 0
                         self.logger.log_agent_rewards(agent, last_reward)
+                
         
             print(f"  回合完成！")
     
     # ===== 生成所有图表 =====
         print("\n数据收集完成！正在生成图表...")
         self.logger.finalize()
+        for agent in self.agent_list:
+            print(f"Agent {agent.id} Episode {self.episode} Immediate Buffer Size: {len(agent.immediate_buffer)}")
+            agent.reset_all()
+            agent.update_epsilon()
+            agent.update_target_network()
+            print(f"当前探索率为{agent.epsilon}")
     
         print(f"\n所有图表已保存到: {self.plot_dir}")
         print("生成的文件:")

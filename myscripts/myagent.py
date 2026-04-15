@@ -51,10 +51,10 @@ class myAgent:
         self.last_value = None                                        # 上一个奖励值
         self.RV_list = None
 
-        self.gamma = 0.95
+        self.gamma = 0.99
         self.epsilon = 1.0                                          # 探索率
         self.epsilon_min = 0.01     
-        self.epsilon_decay = 0.95   # 衰减系数（用于指数衰减）
+        self.epsilon_decay = 0.99   # 衰减系数（用于指数衰减）
         # ds补充
         self.optimizer = torch.optim.Adam(self.behavior.parameters(), lr=self.learning_rate)
         self.criterion = nn.MSELoss()                               # 用于DQN的损失函数
@@ -187,6 +187,7 @@ class myAgent:
             max_next_q_values = self.target(next_states).max(1)[0].unsqueeze(1)
             target_q_values = rewards + self.gamma * max_next_q_values  # 折扣因子gamma=0.99
         # 计算损失
+        print(f"{self.id}::current_q_values::{current_q_values[0]}  target_q_values::{target_q_values[0]}")
         loss = self.criterion(current_q_values, target_q_values)
         # 优化行为网络
         self.optimizer.zero_grad()
