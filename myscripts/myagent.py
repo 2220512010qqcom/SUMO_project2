@@ -187,7 +187,7 @@ class myAgent:
             max_next_q_values = self.target(next_states).max(1)[0].unsqueeze(1)
             target_q_values = rewards + self.gamma * max_next_q_values  # 折扣因子gamma=0.99
         # 计算损失
-        print(f"{self.id}::current_q_values::{current_q_values[0]}  target_q_values::{target_q_values[0]}")
+        # print(f"{self.id}::current_q_values::{current_q_values[0]}  target_q_values::{target_q_values[0]}")
         loss = self.criterion(current_q_values, target_q_values)
         # 优化行为网络
         self.optimizer.zero_grad()

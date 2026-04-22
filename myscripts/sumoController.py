@@ -12,7 +12,8 @@ class SumoController:
         # self.config_file = "../config/sumo_config.sumocfg"       # 使用文件方式启动时的配置路径
         self.process = None
         # self.light_state = ['rrrrrGGGggrrrrrGGGgg','GGGggrrrrrGGGggrrrrr']    # GGGggrrrrrGGGggrrrrr 南北通行，东西红灯   rrrrrGGGggrrrrrGGGgg 东西通行，南北红灯
-        self.light_state = ['GGGgrrrrGGGgrrrr','rrrrGGGgrrrrGGGg']    # GGGggrrrrrGGGggrrrrr 南北通行，东西红灯   rrrrrGGGggrrrrrGGGgg 东西通行，南北红灯
+        # self.light_state = ['GGGgrrrrGGGgrrrr','rrrrGGGgrrrrGGGg']    # GGGggrrrrrGGGggrrrrr 南北通行，东西红灯   rrrrrGGGggrrrrrGGGgg 东西通行，南北红灯  6.net中使用
+        self.light_state = ['GGGGGgrrrrrrrrGGGGGgrrrrrrrr','rrrrrrGGGGGGggrrrrrrGGGGGGgg']    # GGGggrrrrrGGGggrrrrr 南北通行，东西红灯   rrrrrGGGggrrrrrGGGgg 东西通行，南北红灯
 
         self.last_emr_min_speed = 50
 

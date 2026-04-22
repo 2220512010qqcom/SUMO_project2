@@ -44,7 +44,8 @@ class mytrainer:
             controlled_links = self.sumo_controller.get_controlled_lanes(tls_id)   # [[NS],[EW]]
             # 计算输入维度
             num_links = len(controlled_links[0]) + len(controlled_links[1])
-            input_dim = 26  # 每条车道的状态信息维度
+            # input_dim = 26  # 每条车道的状态信息维度 6.net版本
+            input_dim = 50  # 每条车道的状态信息维度 
             self.agent_list.append(myAgent(tls_id,input_dim))
             self.agent_list[-1].set_controlled_lanes(controlled_links)
             self.agent_list[-1].init_RV_list(num_links)
@@ -96,9 +97,7 @@ class mytrainer:
         self.sumo_controller.step_sumo()        #  进行下一步仿真模拟
         for agent in self.agent_list:
             agent.update_behavior_network()
-            # print("参数更新完成！")
-        # if selected_agent_indexs[0] == 0:
-        #     print("智能体1奖励：",selected_agent_rewards[0])
+
 
     def step_to_next_light_change(self):
         '''进行仿真直到下一个智能体需要变灯，返回此次需要变灯的智能体下标数组'''
