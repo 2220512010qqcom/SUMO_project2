@@ -336,6 +336,52 @@ class mytrainer:
             }
         
         return queue_data, waiting_data
+    
+    def collect_emergency_vehicle_data(self):
+        """收集当前紧急车辆数据用于可视化"""
+        emergency_data = {}
+        
+        for agent in self.agent_list:
+            ns_emergency_count = 0
+            ew_emergency_count = 0
+            ns_emergency_min_speed = 99  # 初始化为大值
+            ew_emergency_min_speed = 99
+            ns_emergency_max_wait = 0
+            ew_emergency_max_wait = 0
+            
+            # 收集NS方向紧急车辆数据
+            for lane in agent.controlled_lanes[agent.NS_lanes_index]:
+                state = self.sumo_controller.get_vehicles_in_area(lane)
+                ns_emergency_count += state["emergency_count"]
+                ns_emergency_min_speed = min(ns_emergency_min_speed, state["emergency_min_speed"])
+                ns_emergency_max_wait = max(ns_emergency_max_wait, state["emergency_max_wait_time"])
+            
+            # 收集EW方向紧急车辆数据
+            for lane in agent.controlled_lanes[agent.EW_lanes_index]:
+                state = self.sumo_controller.get_vehicles_in_area(lane)
+                ew_emergency_count += state["emergency_count"]
+                ew_emergency_min_speed = min(ew_emergency_min_speed, state["emergency_min_speed"])
+                ew_emergency_max_wait = max(ew_emergency_max_wait, state["emergency_max_wait_time"])
+            
+            emergency_data[agent.id] = {
+                'NS': {
+                    'count': ns_emergency_count,
+                    'min_speed': ns_emergency_min_speed if ns_emergency_min_speed != 99 else 0,
+                    'max_wait': ns_emergency_max_wait
+                },
+                'EW': {
+                    'count': ew_emergency_count,
+                    'min_speed': ew_emergency_min_speed if ew_emergency_min_speed != 99 else 0,
+                    'max_wait': ew_emergency_max_wait
+                },
+                'total': {
+                    'count': ns_emergency_count + ew_emergency_count,
+                    'min_speed': min(ns_emergency_min_speed, ew_emergency_min_speed),
+                    'max_wait': max(ns_emergency_max_wait, ew_emergency_max_wait)
+                }
+            }
+        
+        return emergency_data
 
     def run_visualization(self):
         """运行可视化数据收集 - 每回合统计一次，带预热"""
@@ -371,6 +417,7 @@ class mytrainer:
         # 收集本回合的步数据
             step_queues = {agent.id: {'NS': [], 'EW': []} for agent in self.agent_list}
             step_waitings = {agent.id: {'NS': [], 'EW': []} for agent in self.agent_list}
+            step_emergency = {agent.id: {'NS': [], 'EW': []} for agent in self.agent_list}  # 紧急车数据
         
             for step in range(self.step_per_episode):
             # 执行一步训练
@@ -378,14 +425,20 @@ class mytrainer:
             
             # 收集当前步的数据
                 queue_data, waiting_data = self.collect_traffic_data()
+                emergency_data = self.collect_emergency_vehicle_data()  # 获取紧急车数据  
+                # for agent_id, data in emergency_data.items():
+                #     if data['total']['count'] > 0:
+                #         print(f"Agent {agent_id} 检测到急救车! 数量: {data['total']['count']}, 最大等待: {data['total']['max_wait']}")
             
                 for agent_id in queue_data:
                     step_queues[agent_id]['NS'].append(queue_data[agent_id]['NS'])
                     step_queues[agent_id]['EW'].append(queue_data[agent_id]['EW'])
                     step_waitings[agent_id]['NS'].append(waiting_data[agent_id]['NS'])
                     step_waitings[agent_id]['EW'].append(waiting_data[agent_id]['EW'])
-            
-            # 打印进度
+                    if agent_id in emergency_data:
+                        step_emergency[agent_id]['NS'].append(emergency_data[agent_id]['NS']['max_wait'])
+                        step_emergency[agent_id]['EW'].append(emergency_data[agent_id]['EW']['max_wait'])
+                        
                 if (step + 1) % 400 == 0:
                     print(f"  步数进度: {step + 1}/{self.step_per_episode}")
                     # 每个回合结束后，可以在这里进行经验回放和网络更新
@@ -407,9 +460,14 @@ class mytrainer:
                 avg_ns_wait = np.mean(step_waitings[agent_id]['NS']) if step_waitings[agent_id]['NS'] else 0
                 avg_ew_wait = np.mean(step_waitings[agent_id]['EW']) if step_waitings[agent_id]['EW'] else 0
                 avg_waiting = (avg_ns_wait + avg_ew_wait) / 2
-            
+
+                avg_ns_emergency = np.mean(step_emergency[agent_id]['NS']) if step_emergency[agent_id]['NS'] else 0
+                avg_ew_emergency = np.mean(step_emergency[agent_id]['EW']) if step_emergency[agent_id]['EW'] else 0
+                avg_emergency = (avg_ns_emergency + avg_ew_emergency) / 2
+
             # 记录到logger
-                self.logger.log_episode_metrics(agent_id, avg_queue, avg_waiting)
+                self.logger.log_episode_metrics(agent_id, avg_queue, avg_waiting) 
+                self.logger.log_episode_emergency(agent_id, avg_emergency)  # 记录紧急车数据      
             
             # 记录奖励（从智能体获取）
                 for agent in self.agent_list:
