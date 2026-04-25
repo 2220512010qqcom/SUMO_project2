@@ -47,21 +47,23 @@ class myLogger():
             reward_df.insert(0, 'Episode', range(1, len(reward_df) + 1))
             reward_df.to_csv(os.path.join(self.plot_dir, "agent_rewards.csv"), index=False)
         
-        # 每个智能体单独保存队列和等待时间数据
+        # 每个智能体单独保存队列、等待时间和急救车数据
         for agent_id in self.agent_queue_data.keys():
             queue_list = self.agent_queue_data[agent_id]['NS_EW']
             waiting_list = self.agent_waiting_data[agent_id]['NS_EW']
+            # 新增：获取急救车数据
             emergency_list = self.agent_emergency_delay_data.get(agent_id, [])
             
             if queue_list and waiting_list:
-                # 由于急救车延误数据可能长度不同，我们需要对齐它们以便保存到同一个CSV文件中
+                # 补齐长度（如果急救车数据不够）
                 max_len = max(len(queue_list), len(waiting_list), len(emergency_list))
                 emergency_padded = emergency_list + [np.nan] * (max_len - len(emergency_list))
-
+                
                 agent_df = pd.DataFrame({
                     'Episode': range(1, len(queue_list) + 1),
                     'Queue_Length_Avg': queue_list,
-                    'Waiting_Time_Avg': waiting_list
+                    'Waiting_Time_Avg': waiting_list,
+                    'Emergency_Delay_Avg': emergency_padded[:len(queue_list)]  # 新增这行
                 })
                 agent_df.to_csv(os.path.join(self.plot_dir, f"agent_{agent_id}_metrics.csv"), index=False)
 
@@ -370,6 +372,9 @@ class myLogger():
         if self.agent_emergency_delay_data:
             self.plot_all_agents_comparison('emergency')
             self.plot_all_agents_emergency_delay()
+
+    # 临时添加，检查是否有数据
+        print(f"Emergency data: {self.agent_emergency_delay_data}")
 
     def finalize(self):
         """完成训练后的最终处理"""
