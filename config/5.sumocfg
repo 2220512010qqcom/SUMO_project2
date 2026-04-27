@@ -21,5 +21,9 @@
             <!-- delay: GUI 启动后的初始延迟（毫秒），用于观察初始状态或调试 -->
             <delay value="100"/>
     </gui_only>
+    <processing>
+        <ignore-route-errors value="true"/>
+        <no-warnings value="true"/>  <!-- 警用警告，用于清理输出 -->
+    </processing>
 
 </sumoConfiguration>

@@ -5,69 +5,141 @@
 
 <routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/routes_file.xsd">
     <!-- Vehicles, persons and containers (sorted by depart) -->
-    <flow id="f_0" begin="0" end="36000" number="700" from="E0" to="E14"/>
-    <flow id="f_1" begin="0" end="36000" number="700" from="E0" to="-E11"/>
-    <flow id="f_2" begin="0" end="36000" number="700" from="E0" to="E3"/>
-    <flow id="f_3" begin="0" end="36000" number="700" from="E0" to="E15"/>
-    <flow id="f_4" begin="0" end="36000" number="700" from="E0" to="E13"/>
-    <flow id="f_5" begin="0" end="36000" number="700" from="E0" to="E8"/>
-    <flow id="f_6" begin="0" end="36000" number="700" from="E0" to="-E9"/>
+    <vType id="car" vClass="passenger" accel="2.6" decel="4.5" sigma="0.5" length="4.5" minGap="2.5" maxSpeed="55.0"/>
 
-    <flow id="f_7" begin="0" end="36000" number="700" from="-E3" to="E14"/>
-    <flow id="f_8" begin="0" end="36000" number="700" from="-E3" to="-E11"/>
-    <flow id="f_9" begin="0" end="36000" number="700" from="-E3" to="-E0"/>
-    <flow id="f_10" begin="0" end="36000" number="700" from="-E3" to="E15"/>
-    <flow id="f_11" begin="0" end="36000" number="700" from="-E3" to="E13"/>
-    <flow id="f_12" begin="0" end="36000" number="700" from="-E3" to="E8"/>
-    <flow id="f_13" begin="0" end="36000" number="700" from="-E3" to="-E9"/>
 
-    <flow id="f_14" begin="0" end="36000" number="700" from="E11" to="E14"/>
-    <flow id="f_15" begin="0" end="36000" number="700" from="E11" to="-E0"/>
-    <flow id="f_16" begin="0" end="36000" number="700" from="E11" to="E3"/>
-    <flow id="f_17" begin="0" end="36000" number="700" from="E11" to="E15"/>
-    <flow id="f_18" begin="0" end="36000" number="700" from="E11" to="E13"/>
-    <flow id="f_19" begin="0" end="36000" number="700" from="E11" to="E8"/>
-    <flow id="f_20" begin="0" end="36000" number="700" from="E11" to="-E9"/>
+    <flow id="f_0" type="car" begin="0" end="36000" number="700" from="E0" to="E14"/>
+    <flow id="f_1" type="car" begin="0" end="36000" number="700" from="E0" to="-E11"/>
+    <flow id="f_2" type="car" begin="0" end="36000" number="700" from="E0" to="E3"/>
+    <flow id="f_3" type="car" begin="0" end="36000" number="700" from="E0" to="E15"/>
+    <flow id="f_4" type="car" begin="0" end="36000" number="700" from="E0" to="E13"/>
+    <flow id="f_5" type="car" begin="0" end="36000" number="700" from="E0" to="E8"/>
+    <flow id="f_6" type="car" begin="0" end="36000" number="700" from="E0" to="-E9"/>
 
-    <flow id="f_21" begin="0" end="36000" number="700" from="-E14" to="-E0"/>
-    <flow id="f_22" begin="0" end="36000" number="700" from="-E14" to="-E11"/>
-    <flow id="f_23" begin="0" end="36000" number="700" from="-E14" to="E3"/>
-    <flow id="f_24" begin="0" end="36000" number="700" from="-E14" to="E15"/>
-    <flow id="f_25" begin="0" end="36000" number="700" from="-E14" to="E13"/>
-    <flow id="f_26" begin="0" end="36000" number="700" from="-E14" to="E8"/>
-    <flow id="f_27" begin="0" end="36000" number="700" from="-E14" to="-E9"/>
+    <flow id="f_7" type="car" begin="0" end="36000" number="700" from="-E3" to="E14"/>
+    <flow id="f_8" type="car" begin="0" end="36000" number="700" from="-E3" to="-E11"/>
+    <flow id="f_9" type="car" begin="0" end="36000" number="700" from="-E3" to="-E0"/>
+    <flow id="f_10" type="car" begin="0" end="36000" number="700" from="-E3" to="E15"/>
+    <flow id="f_11" type="car" begin="0" end="36000" number="700" from="-E3" to="E13"/>
+    <flow id="f_12" type="car" begin="0" end="36000" number="700" from="-E3" to="E8"/>
+    <flow id="f_13" type="car" begin="0" end="36000" number="700" from="-E3" to="-E9"/>
 
-    <flow id="f_28" begin="0" end="36000" number="700" from="E9" to="E14"/>
-    <flow id="f_29" begin="0" end="36000" number="700" from="E9" to="-E11"/>
-    <flow id="f_30" begin="0" end="36000" number="700" from="E9" to="E3"/>
-    <flow id="f_31" begin="0" end="36000" number="700" from="E9" to="E15"/>
-    <flow id="f_32" begin="0" end="36000" number="700" from="E9" to="E13"/>
-    <flow id="f_33" begin="0" end="36000" number="700" from="E9" to="E8"/>
-    <flow id="f_34" begin="0" end="36000" number="700" from="E9" to="-E0"/>
+    <flow id="f_14" type="car" begin="0" end="36000" number="700" from="E11" to="E14"/>
+    <flow id="f_15" type="car" begin="0" end="36000" number="700" from="E11" to="-E0"/>
+    <flow id="f_16" type="car" begin="0" end="36000" number="700" from="E11" to="E3"/>
+    <flow id="f_17" type="car" begin="0" end="36000" number="700" from="E11" to="E15"/>
+    <flow id="f_18" type="car" begin="0" end="36000" number="700" from="E11" to="E13"/>
+    <flow id="f_19" type="car" begin="0" end="36000" number="700" from="E11" to="E8"/>
+    <flow id="f_20" type="car" begin="0" end="36000" number="700" from="E11" to="-E9"/>
 
-    <flow id="f_35" begin="0" end="36000" number="700" from="-E15" to="E14"/>
-    <flow id="f_36" begin="0" end="36000" number="700" from="-E15" to="-E11"/>
-    <flow id="f_37" begin="0" end="36000" number="700" from="-E15" to="E3"/>
-    <flow id="f_38" begin="0" end="36000" number="700" from="-E15" to="-E0"/>
-    <flow id="f_39" begin="0" end="36000" number="700" from="-E15" to="E13"/>
-    <flow id="f_40" begin="0" end="36000" number="700" from="-E15" to="E8"/>
-    <flow id="f_41" begin="0" end="36000" number="700" from="-E15" to="-E9"/>
+    <flow id="f_21" type="car" begin="0" end="36000" number="700" from="-E14" to="-E0"/>
+    <flow id="f_22" type="car" begin="0" end="36000" number="700" from="-E14" to="-E11"/>
+    <flow id="f_23" type="car" begin="0" end="36000" number="700" from="-E14" to="E3"/>
+    <flow id="f_24" type="car" begin="0" end="36000" number="700" from="-E14" to="E15"/>
+    <flow id="f_25" type="car" begin="0" end="36000" number="700" from="-E14" to="E13"/>
+    <flow id="f_26" type="car" begin="0" end="36000" number="700" from="-E14" to="E8"/>
+    <flow id="f_27" type="car" begin="0" end="36000" number="700" from="-E14" to="-E9"/>
 
-    <flow id="f_42" begin="0" end="36000" number="700" from="-E8" to="E14"/>
-    <flow id="f_43" begin="0" end="36000" number="700" from="-E8" to="-E11"/>
-    <flow id="f_44" begin="0" end="36000" number="700" from="-E8" to="E3"/>
-    <flow id="f_45" begin="0" end="36000" number="700" from="-E8" to="E15"/>
-    <flow id="f_46" begin="0" end="36000" number="700" from="-E8" to="E13"/>
-    <flow id="f_47" begin="0" end="36000" number="700" from="-E8" to="-E0"/>
-    <flow id="f_48" begin="0" end="36000" number="700" from="-E8" to="-E9"/>
+    <flow id="f_28" type="car" begin="0" end="36000" number="700" from="E9" to="E14"/>
+    <flow id="f_29" type="car" begin="0" end="36000" number="700" from="E9" to="-E11"/>
+    <flow id="f_30" type="car" begin="0" end="36000" number="700" from="E9" to="E3"/>
+    <flow id="f_31" type="car" begin="0" end="36000" number="700" from="E9" to="E15"/>
+    <flow id="f_32" type="car" begin="0" end="36000" number="700" from="E9" to="E13"/>
+    <flow id="f_33" type="car" begin="0" end="36000" number="700" from="E9" to="E8"/>
+    <flow id="f_34" type="car" begin="0" end="36000" number="700" from="E9" to="-E0"/>
 
-    <flow id="f_49" begin="0" end="36000" number="700" from="-E13" to="E14"/>
-    <flow id="f_50" begin="0" end="36000" number="700" from="-E13" to="-E11"/>
-    <flow id="f_51" begin="0" end="36000" number="700" from="-E13" to="E3"/>
-    <flow id="f_52" begin="0" end="36000" number="700" from="-E13" to="E15"/>
-    <flow id="f_53" begin="0" end="36000" number="700" from="-E13" to="-E0"/>
-    <flow id="f_54" begin="0" end="36000" number="700" from="-E13" to="E8"/>
-    <flow id="f_55" begin="0" end="36000" number="700" from="-E13" to="-E9"/>
+    <flow id="f_35" type="car" begin="0" end="36000" number="700" from="-E15" to="E14"/>
+    <flow id="f_36" type="car" begin="0" end="36000" number="700" from="-E15" to="-E11"/>
+    <flow id="f_37" type="car" begin="0" end="36000" number="700" from="-E15" to="E3"/>
+    <flow id="f_38" type="car" begin="0" end="36000" number="700" from="-E15" to="-E0"/>
+    <flow id="f_39" type="car" begin="0" end="36000" number="700" from="-E15" to="E13"/>
+    <flow id="f_40" type="car" begin="0" end="36000" number="700" from="-E15" to="E8"/>
+    <flow id="f_41" type="car" begin="0" end="36000" number="700" from="-E15" to="-E9"/>
+
+    <flow id="f_42" type="car" begin="0" end="36000" number="700" from="-E8" to="E14"/>
+    <flow id="f_43" type="car" begin="0" end="36000" number="700" from="-E8" to="-E11"/>
+    <flow id="f_44" type="car" begin="0" end="36000" number="700" from="-E8" to="E3"/>
+    <flow id="f_45" type="car" begin="0" end="36000" number="700" from="-E8" to="E15"/>
+    <flow id="f_46" type="car" begin="0" end="36000" number="700" from="-E8" to="E13"/>
+    <flow id="f_47" type="car" begin="0" end="36000" number="700" from="-E8" to="-E0"/>
+    <flow id="f_48" type="car" begin="0" end="36000" number="700" from="-E8" to="-E9"/>
+
+    <flow id="f_49" type="car" begin="0" end="36000" number="700" from="-E13" to="E14"/>
+    <flow id="f_50" type="car" begin="0" end="36000" number="700" from="-E13" to="-E11"/>
+    <flow id="f_51" type="car" begin="0" end="36000" number="700" from="-E13" to="E3"/>
+    <flow id="f_52" type="car" begin="0" end="36000" number="700" from="-E13" to="E15"/>
+    <flow id="f_53" type="car" begin="0" end="36000" number="700" from="-E13" to="-E0"/>
+    <flow id="f_54" type="car" begin="0" end="36000" number="700" from="-E13" to="E8"/>
+    <flow id="f_55" type="car" begin="0" end="36000" number="700" from="-E13" to="-E9"/>
+
+
+<!-- 急救车定义部分 -->
+
+    <vType id="ambulance" vClass="emergency" accel="3.5" decel="6.0" sigma="0.3" length="6.0" minGap="2.0" maxSpeed="60.0"/>
+
+    <flow id="f_0" type="emergency" begin="0" end="36000" number="700" from="E0" to="E14"/>
+    <flow id="f_1" type="emergency" begin="0" end="36000" number="700" from="E0" to="-E11"/>
+    <flow id="f_2" type="emergency" begin="0" end="36000" number="700" from="E0" to="E3"/>
+    <flow id="f_3" type="emergency" begin="0" end="36000" number="700" from="E0" to="E15"/>
+    <flow id="f_4" type="emergency" begin="0" end="36000" number="700" from="E0" to="E13"/>
+    <flow id="f_5" type="emergency" begin="0" end="36000" number="700" from="E0" to="E8"/>
+    <flow id="f_6" type="emergency" begin="0" end="36000" number="700" from="E0" to="-E9"/>
+
+    <flow id="f_7" type="emergency" begin="0" end="36000" number="700" from="-E3" to="E14"/>
+    <flow id="f_8" type="emergency" begin="0" end="36000" number="700" from="-E3" to="-E11"/>
+    <flow id="f_9" type="emergency" begin="0" end="36000" number="700" from="-E3" to="-E0"/>
+    <flow id="f_10" type="emergency" begin="0" end="36000" number="700" from="-E3" to="E15"/>
+    <flow id="f_11" type="emergency" begin="0" end="36000" number="700" from="-E3" to="E13"/>
+    <flow id="f_12" type="emergency" begin="0" end="36000" number="700" from="-E3" to="E8"/>
+    <flow id="f_13" type="emergency" begin="0" end="36000" number="700" from="-E3" to="-E9"/>
+
+    <flow id="f_14" type="emergency" begin="0" end="36000" number="700" from="E11" to="E14"/>
+    <flow id="f_15" type="emergency" begin="0" end="36000" number="700" from="E11" to="-E0"/>
+    <flow id="f_16" type="emergency" begin="0" end="36000" number="700" from="E11" to="E3"/>
+    <flow id="f_17" type="emergency" begin="0" end="36000" number="700" from="E11" to="E15"/>
+    <flow id="f_18" type="emergency" begin="0" end="36000" number="700" from="E11" to="E13"/>
+    <flow id="f_19" type="emergency" begin="0" end="36000" number="700" from="E11" to="E8"/>
+    <flow id="f_20" type="emergency" begin="0" end="36000" number="700" from="E11" to="-E9"/>
+
+    <flow id="f_21" type="emergency" begin="0" end="36000" number="700" from="-E14" to="-E0"/>
+    <flow id="f_22" type="emergency" begin="0" end="36000" number="700" from="-E14" to="-E11"/>
+    <flow id="f_23" type="emergency" begin="0" end="36000" number="700" from="-E14" to="E3"/>
+    <flow id="f_24" type="emergency" begin="0" end="36000" number="700" from="-E14" to="E15"/>
+    <flow id="f_25" type="emergency" begin="0" end="36000" number="700" from="-E14" to="E13"/>
+    <flow id="f_26" type="emergency" begin="0" end="36000" number="700" from="-E14" to="E8"/>
+    <flow id="f_27" type="emergency" begin="0" end="36000" number="700" from="-E14" to="-E9"/>
+
+    <flow id="f_28" type="emergency" begin="0" end="36000" number="700" from="E9" to="E14"/>
+    <flow id="f_29" type="emergency" begin="0" end="36000" number="700" from="E9" to="-E11"/>
+    <flow id="f_30" type="emergency" begin="0" end="36000" number="700" from="E9" to="E3"/>
+    <flow id="f_31" type="emergency" begin="0" end="36000" number="700" from="E9" to="E15"/>
+    <flow id="f_32" type="emergency" begin="0" end="36000" number="700" from="E9" to="E13"/>
+    <flow id="f_33" type="emergency" begin="0" end="36000" number="700" from="E9" to="E8"/>
+    <flow id="f_34" type="emergency" begin="0" end="36000" number="700" from="E9" to="-E0"/>
+
+    <flow id="f_35" type="emergency" begin="0" end="36000" number="700" from="-E15" to="E14"/>
+    <flow id="f_36" type="emergency" begin="0" end="36000" number="700" from="-E15" to="-E11"/>
+    <flow id="f_37" type="emergency" begin="0" end="36000" number="700" from="-E15" to="E3"/>
+    <flow id="f_38" type="emergency" begin="0" end="36000" number="700" from="-E15" to="-E0"/>
+    <flow id="f_39" type="emergency" begin="0" end="36000" number="700" from="-E15" to="E13"/>
+    <flow id="f_40" type="emergency" begin="0" end="36000" number="700" from="-E15" to="E8"/>
+    <flow id="f_41" type="emergency" begin="0" end="36000" number="700" from="-E15" to="-E9"/>
+
+    <flow id="f_42" type="emergency" begin="0" end="36000" number="700" from="-E8" to="E14"/>
+    <flow id="f_43" type="emergency" begin="0" end="36000" number="700" from="-E8" to="-E11"/>
+    <flow id="f_44" type="emergency" begin="0" end="36000" number="700" from="-E8" to="E3"/>
+    <flow id="f_45" type="emergency" begin="0" end="36000" number="700" from="-E8" to="E15"/>
+    <flow id="f_46" type="emergency" begin="0" end="36000" number="700" from="-E8" to="E13"/>
+    <flow id="f_47" type="emergency" begin="0" end="36000" number="700" from="-E8" to="-E0"/>
+    <flow id="f_48" type="emergency" begin="0" end="36000" number="700" from="-E8" to="-E9"/>
+
+    <flow id="f_49" type="emergency" begin="0" end="36000" number="700" from="-E13" to="E14"/>
+    <flow id="f_50" type="emergency" begin="0" end="36000" number="700" from="-E13" to="-E11"/>
+    <flow id="f_51" type="emergency" begin="0" end="36000" number="700" from="-E13" to="E3"/>
+    <flow id="f_52" type="emergency" begin="0" end="36000" number="700" from="-E13" to="E15"/>
+    <flow id="f_53" type="emergency" begin="0" end="36000" number="700" from="-E13" to="-E0"/>
+    <flow id="f_54" type="emergency" begin="0" end="36000" number="700" from="-E13" to="E8"/>
+    <flow id="f_55" type="emergency" begin="0" end="36000" number="700" from="-E13" to="-E9"/>
 
 
     
