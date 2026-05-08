@@ -331,8 +331,10 @@ class mytrainer:
                 'EW': ew_queues
             }
             waiting_data[agent.id] = {
-                'NS': ns_waiting / ns_count if ns_count > 0 else 0,
-                'EW': ew_waiting / ew_count if ew_count > 0 else 0
+            #     'NS': ns_waiting / ns_count if ns_count > 0 else 0,
+            #     'EW': ew_waiting / ew_count if ew_count > 0 else 0
+                'NS': ns_waiting,
+                'EW': ew_waiting
             }
         
         return queue_data, waiting_data
