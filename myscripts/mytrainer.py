@@ -348,38 +348,40 @@ class mytrainer:
             ew_emergency_count = 0
             ns_emergency_min_speed = 99  # 初始化为大值
             ew_emergency_min_speed = 99
-            ns_emergency_max_wait = 0
-            ew_emergency_max_wait = 0
-            
+            # ns_emergency_max_wait = 0
+            # ew_emergency_max_wait = 0
+            ns_emergency_total_wait = 0
+            ew_emergency_total_wait = 0
+
             # 收集NS方向紧急车辆数据
             for lane in agent.controlled_lanes[agent.NS_lanes_index]:
                 state = self.sumo_controller.get_vehicles_in_area(lane)
                 ns_emergency_count += state["emergency_count"]
                 ns_emergency_min_speed = min(ns_emergency_min_speed, state["emergency_min_speed"])
-                ns_emergency_max_wait = max(ns_emergency_max_wait, state["emergency_max_wait_time"])
+                ns_emergency_total_wait += state["emergency_total_wait_time"]
             
             # 收集EW方向紧急车辆数据
             for lane in agent.controlled_lanes[agent.EW_lanes_index]:
                 state = self.sumo_controller.get_vehicles_in_area(lane)
                 ew_emergency_count += state["emergency_count"]
                 ew_emergency_min_speed = min(ew_emergency_min_speed, state["emergency_min_speed"])
-                ew_emergency_max_wait = max(ew_emergency_max_wait, state["emergency_max_wait_time"])
+                ew_emergency_total_wait += state["emergency_total_wait_time"]
             
             emergency_data[agent.id] = {
                 'NS': {
                     'count': ns_emergency_count,
                     'min_speed': ns_emergency_min_speed if ns_emergency_min_speed != 99 else 0,
-                    'max_wait': ns_emergency_max_wait
+                    'total_wait': ns_emergency_total_wait
                 },
                 'EW': {
                     'count': ew_emergency_count,
                     'min_speed': ew_emergency_min_speed if ew_emergency_min_speed != 99 else 0,
-                    'max_wait': ew_emergency_max_wait
+                    'total_wait': ew_emergency_total_wait
                 },
                 'total': {
                     'count': ns_emergency_count + ew_emergency_count,
                     'min_speed': min(ns_emergency_min_speed, ew_emergency_min_speed),
-                    'max_wait': max(ns_emergency_max_wait, ew_emergency_max_wait)
+                    'total_wait': ns_emergency_total_wait + ew_emergency_total_wait
                 }
             }
         
@@ -418,8 +420,10 @@ class mytrainer:
         
         # 收集本回合的步数据
             step_queues = {agent.id: {'NS': [], 'EW': []} for agent in self.agent_list}
-            step_waitings = {agent.id: {'NS': [], 'EW': []} for agent in self.agent_list}
-            step_emergency = {agent.id: {'NS': [], 'EW': []} for agent in self.agent_list}  # 紧急车数据
+            # step_waitings = {agent.id: {'NS': [], 'EW': []} for agent in self.agent_list}
+            # step_emergency = {agent.id: {'NS': [], 'EW': []} for agent in self.agent_list}  # 紧急车数据
+            step_waitings = {agent.id: {'NS': 0, 'EW': 0} for agent in self.agent_list}      # 改为累加
+            step_emergency = {agent.id: {'NS': 0, 'EW': 0} for agent in self.agent_list}      # 改为累加
         
             for step in range(self.step_per_episode):
             # 执行一步训练
@@ -435,11 +439,15 @@ class mytrainer:
                 for agent_id in queue_data:
                     step_queues[agent_id]['NS'].append(queue_data[agent_id]['NS'])
                     step_queues[agent_id]['EW'].append(queue_data[agent_id]['EW'])
-                    step_waitings[agent_id]['NS'].append(waiting_data[agent_id]['NS'])
-                    step_waitings[agent_id]['EW'].append(waiting_data[agent_id]['EW'])
+                    # step_waitings[agent_id]['NS'].append(waiting_data[agent_id]['NS'])
+                    # step_waitings[agent_id]['EW'].append(waiting_data[agent_id]['EW'])
+                    step_waitings[agent_id]['NS'] += waiting_data[agent_id]['NS']
+                    step_waitings[agent_id]['EW'] += waiting_data[agent_id]['EW']
                     if agent_id in emergency_data:
-                        step_emergency[agent_id]['NS'].append(emergency_data[agent_id]['NS']['max_wait'])
-                        step_emergency[agent_id]['EW'].append(emergency_data[agent_id]['EW']['max_wait'])
+                        # step_emergency[agent_id]['NS'].append(emergency_data[agent_id]['NS']['max_wait'])
+                        # step_emergency[agent_id]['EW'].append(emergency_data[agent_id]['EW']['max_wait'])
+                        step_emergency[agent_id]['NS'] += emergency_data[agent_id]['NS']['total_wait']
+                        step_emergency[agent_id]['EW'] += emergency_data[agent_id]['EW']['total_wait']
                         
                 if (step + 1) % 400 == 0:
                     print(f"  步数进度: {step + 1}/{self.step_per_episode}")
@@ -459,17 +467,25 @@ class mytrainer:
                 avg_queue = (avg_ns_queue + avg_ew_queue) / 2
             
             # 计算NS和EW的平均等待时间
-                avg_ns_wait = np.mean(step_waitings[agent_id]['NS']) if step_waitings[agent_id]['NS'] else 0
-                avg_ew_wait = np.mean(step_waitings[agent_id]['EW']) if step_waitings[agent_id]['EW'] else 0
-                avg_waiting = (avg_ns_wait + avg_ew_wait) / 2
+                # avg_ns_wait = np.mean(step_waitings[agent_id]['NS']) if step_waitings[agent_id]['NS'] else 0
+                # avg_ew_wait = np.mean(step_waitings[agent_id]['EW']) if step_waitings[agent_id]['EW'] else 0
+                # avg_waiting = (avg_ns_wait + avg_ew_wait) / 2
 
-                avg_ns_emergency = np.mean(step_emergency[agent_id]['NS']) if step_emergency[agent_id]['NS'] else 0
-                avg_ew_emergency = np.mean(step_emergency[agent_id]['EW']) if step_emergency[agent_id]['EW'] else 0
-                avg_emergency = (avg_ns_emergency + avg_ew_emergency) / 2
+                # avg_ns_emergency = np.mean(step_emergency[agent_id]['NS']) if step_emergency[agent_id]['NS'] else 0
+                # avg_ew_emergency = np.mean(step_emergency[agent_id]['EW']) if step_emergency[agent_id]['EW'] else 0
+                # avg_emergency = (avg_ns_emergency + avg_ew_emergency) / 2
+
+                total_ns_wait = step_waitings[agent_id]['NS']
+                total_ew_wait = step_waitings[agent_id]['EW']
+                total_waiting = total_ns_wait + total_ew_wait   # 总等待时间
+
+                total_ns_emergency = step_emergency[agent_id]['NS']
+                total_ew_emergency = step_emergency[agent_id]['EW']
+                total_emergency = total_ns_emergency + total_ew_emergency   # 急救车总延误
 
             # 记录到logger
-                self.logger.log_episode_metrics(agent_id, avg_queue, avg_waiting) 
-                self.logger.log_episode_emergency(agent_id, avg_emergency)  # 记录紧急车数据      
+                self.logger.log_episode_metrics(agent_id, avg_queue, total_waiting) 
+                self.logger.log_episode_emergency(agent_id, total_emergency)  # 记录紧急车数据      
             
             # 记录奖励（从智能体获取）
                 for agent in self.agent_list:

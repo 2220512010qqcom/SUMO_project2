@@ -70,7 +70,12 @@ class SumoController:
         '''获取一个车道上的所有车辆信息，用于计算state'''
         vehicle_count = self.get_vehicle_count_by_lane(lane_id)
         max_waiting_time, total_waiting_time = self.get_max_waiting_time_by_lane(lane_id)
-        emergency_count, emergency_min_speed, emergency_max_wait_time = self.get_emergency_count_speed_waitTime(lane_id)
+        (
+            emergency_count,
+            emergency_min_speed,
+            emergency_max_wait_time,
+            emergency_total_wait_time
+        ) = self.get_emergency_count_speed_waitTime(lane_id)
         average_speed = traci.lane.getLastStepMeanSpeed(lane_id)
         Occupancy = traci.lane.getLastStepOccupancy(lane_id)        # 车道占有率
         
@@ -83,6 +88,7 @@ class SumoController:
             "emergency_count": emergency_count,
             "emergency_min_speed": emergency_min_speed,
             "emergency_max_wait_time":emergency_max_wait_time,
+            "emergency_total_wait_time": emergency_total_wait_time,
             "average_speed": average_speed ,
             "occupancy": Occupancy  
         }
@@ -92,27 +98,47 @@ class SumoController:
 
 
 
-    def get_emergency_count_speed_waitTime(self,lane_id):
-        emergency_vehicles = []
-        emergency_speeds = []  # 收集所有急救车的速度
-        emergency_wait_times = []  # 收集所有急救车的等待时间
-        # 获取该车道上所有车辆 ID
+    def get_emergency_count_speed_waitTime(self, lane_id):
+
+        emergency_speeds = []
+        emergency_wait_times = []
+
+        emergency_count = 0
+
         vehicle_ids = traci.lane.getLastStepVehicleIDs(lane_id)
-        emergency_count = len(vehicle_ids)
+
         for veh_id in vehicle_ids:
-            # 1. 判断是否是急救车
+
             vtype = traci.vehicle.getTypeID(veh_id)
-            if vtype in ["emergency", "ambulance", "firebrigade", "police"]:  # 根据你的 .rou.xml 定义调整
+
+            # 判断是否急救车
+            if vtype in ["emergency", "ambulance", "firebrigade", "police"]:
+
                 emergency_count += 1
-                emergency_vehicles.append(veh_id)
-                emergency_speed = traci.vehicle.getSpeed(veh_id) 
-                emergency_speeds.append(emergency_speed)
-                emergency_wait_time = traci.vehicle.getWaitingTime(veh_id)
-                emergency_wait_times.append(emergency_wait_time)
-        # 计算急救车的最大等待时间（如果没有急救车，则为 0）
+
+                # 速度
+                speed = traci.vehicle.getSpeed(veh_id)
+                emergency_speeds.append(speed)
+
+                # 等待时间
+                wait_time = traci.vehicle.getWaitingTime(veh_id)
+                emergency_wait_times.append(wait_time)
+
+        # 最小速度
         emergency_min_speed = min(emergency_speeds) if emergency_speeds else 99
+
+        # 最大等待时间
         emergency_max_wait_time = max(emergency_wait_times) if emergency_wait_times else 0
-        return emergency_count,emergency_min_speed,emergency_max_wait_time
+
+        # 新增：总等待时间
+        emergency_total_wait_time = sum(emergency_wait_times)
+
+        return (
+            emergency_count,
+            emergency_min_speed,
+            emergency_max_wait_time,
+            emergency_total_wait_time
+        )
         
     def get_trafficlight_IDlist(self):
         tls_ids = traci.trafficlight.getIDList()

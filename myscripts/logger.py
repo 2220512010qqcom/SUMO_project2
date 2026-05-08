@@ -28,14 +28,14 @@ class myLogger():
         """记录每个智能体的奖励数据"""
         self.all_agent_reward_dict[agent.id].append(reward)
 
-    def log_episode_metrics(self, agent_id, avg_queue, avg_waiting):
+    def log_episode_metrics(self, agent_id, avg_queue, total_waiting):
         """记录每个回合的指标（合并NS和EW方向，传入的已经是平均值）"""
         self.agent_queue_data[agent_id]['NS_EW'].append(avg_queue)
-        self.agent_waiting_data[agent_id]['NS_EW'].append(avg_waiting)
+        self.agent_waiting_data[agent_id]['NS_EW'].append(total_waiting)
 
-    def log_episode_emergency(self, agent_id, avg_emergency_delay):
+    def log_episode_emergency(self, agent_id, total_emergency_delay):
         """记录每个回合的急救车延误"""
-        self.agent_emergency_delay_data[agent_id].append(avg_emergency_delay)
+        self.agent_emergency_delay_data[agent_id].append(total_emergency_delay)
 
 
     def save_agent_data_to_csv(self):
@@ -62,8 +62,8 @@ class myLogger():
                 agent_df = pd.DataFrame({
                     'Episode': range(1, len(queue_list) + 1),
                     'Queue_Length_Avg': queue_list,
-                    'Waiting_Time_Avg': waiting_list,
-                    'Emergency_Delay_Avg': emergency_padded[:len(queue_list)]  # 新增这行
+                    'Waiting_Time_Total': waiting_list,
+                    'Emergency_Delay_Total': emergency_padded[:len(queue_list)]
                 })
                 agent_df.to_csv(os.path.join(self.plot_dir, f"agent_{agent_id}_metrics.csv"), index=False)
 
@@ -156,7 +156,7 @@ class myLogger():
         self._add_smoothing(ax, episodes, waiting_list, window, 'red')
         
         ax.set_title(f'Agent {agent_id} Waiting Time per Episode', fontsize=14, fontweight='bold')
-        ax.set_ylabel('Average Waiting Time (seconds)')
+        ax.set_ylabel('Total Waiting Time (seconds)')
         ax.legend(loc='best')
         
         self._save_figure(fig, f'agent_{agent_id}_waiting_time_curve.png')
