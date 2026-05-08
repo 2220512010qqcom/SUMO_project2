@@ -373,8 +373,8 @@ class myLogger():
             self.plot_all_agents_comparison('emergency')
             self.plot_all_agents_emergency_delay()
 
-    # 临时添加，检查是否有数据
-        print(f"Emergency data: {self.agent_emergency_delay_data}")
+        # 临时添加，检查是否有数据
+            print(f"Emergency data: {self.agent_emergency_delay_data}")
 
     def finalize(self):
         """完成训练后的最终处理"""

@@ -488,27 +488,25 @@ class mytrainer:
                 self.logger.log_episode_emergency(agent_id, total_emergency)  # 记录紧急车数据      
             
             # 记录奖励（从智能体获取）
-                # for agent in self.agent_list:
-                #     if agent.id == agent_id and agent.reward_list:
-                #         last_reward = agent.reward_list[-1] if agent.reward_list else 0
-                #         self.logger.log_agent_rewards(agent, last_reward)
-                for agent in self.agent_list:
-                        if agent.id == agent_id and agent.reward_list:
-                            total_reward = sum(agent.reward_list)
-                            self.logger.log_agent_rewards(agent, total_reward)
-            
-            print(f"  回合完成！")
-
-            # episode结束后再reset
+            # for agent in self.agent_list:
+            #     if agent.id == agent_id and agent.reward_list:
+            #         last_reward = agent.reward_list[-1] if agent.reward_list else 0
+            #         self.logger.log_agent_rewards(agent, last_reward)
+            # ===== 记录奖励（每个 agent 只处理一次，移到循环外面）=====
             for agent in self.agent_list:
+                if agent.reward_list:
+                    total_reward = sum(agent.reward_list)
+                    self.logger.log_agent_rewards(agent, total_reward)
+                    agent.reward_list = []   # 清空，准备下一回合
+                    print(f"  回合 {self.episode}, Agent {agent.id}, 累计奖励: {total_reward:.2f}")
 
+            # ===== 更新网络 =====
+            for agent in self.agent_list:
                 agent.update_epsilon()
                 agent.update_target_network()
-
                 print(f"当前探索率为{agent.epsilon}")
 
-                # 最后清空
-                agent.reset_all()
+            print(f"  回合完成！")
     
     # ===== 生成所有图表 =====
         print("\n数据收集完成！正在生成图表...")
