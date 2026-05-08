@@ -449,15 +449,15 @@ class mytrainer:
                         step_emergency[agent_id]['NS'] += emergency_data[agent_id]['NS']['total_wait']
                         step_emergency[agent_id]['EW'] += emergency_data[agent_id]['EW']['total_wait']
                         
-                if (step + 1) % 400 == 0:
-                    print(f"  步数进度: {step + 1}/{self.step_per_episode}")
-                    # 每个回合结束后，可以在这里进行经验回放和网络更新
-                    for agent in self.agent_list:
-                        print(f"Agent {agent.id} Episode {self.episode} Immediate Buffer Size: {len(agent.immediate_buffer)}")
-                        agent.reset_all()
-                        agent.update_epsilon()
-                        agent.update_target_network()
-                        print(f"当前探索率为{agent.epsilon}")
+                # if (step + 1) % 400 == 0:
+                #     print(f"  步数进度: {step + 1}/{self.step_per_episode}")
+                #     # 每个回合结束后，可以在这里进行经验回放和网络更新
+                #     for agent in self.agent_list:
+                #         print(f"Agent {agent.id} Episode {self.episode} Immediate Buffer Size: {len(agent.immediate_buffer)}")
+                #         # agent.reset_all()
+                #         agent.update_epsilon()
+                #         agent.update_target_network()
+                        # print(f"当前探索率为{agent.epsilon}")
         
         # ===== 计算本回合的平均值（合并NS和EW方向）=====
             for agent_id in step_queues:
@@ -488,13 +488,27 @@ class mytrainer:
                 self.logger.log_episode_emergency(agent_id, total_emergency)  # 记录紧急车数据      
             
             # 记录奖励（从智能体获取）
+                # for agent in self.agent_list:
+                #     if agent.id == agent_id and agent.reward_list:
+                #         last_reward = agent.reward_list[-1] if agent.reward_list else 0
+                #         self.logger.log_agent_rewards(agent, last_reward)
                 for agent in self.agent_list:
-                    if agent.id == agent_id and agent.reward_list:
-                        last_reward = agent.reward_list[-1] if agent.reward_list else 0
-                        self.logger.log_agent_rewards(agent, last_reward)
-                
-        
+                        if agent.id == agent_id and agent.reward_list:
+                            total_reward = sum(agent.reward_list)
+                            self.logger.log_agent_rewards(agent, total_reward)
+            
             print(f"  回合完成！")
+
+            # episode结束后再reset
+            for agent in self.agent_list:
+
+                agent.update_epsilon()
+                agent.update_target_network()
+
+                print(f"当前探索率为{agent.epsilon}")
+
+                # 最后清空
+                agent.reset_all()
     
     # ===== 生成所有图表 =====
         print("\n数据收集完成！正在生成图表...")
