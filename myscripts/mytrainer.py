@@ -23,8 +23,8 @@ class mytrainer:
 
     def __init__(self):
         self.episode = 0
-        self.max_episodes = 10          # 最大训练回合数
-        self.step_per_episode = 800     # 每个回合的最大步数
+        self.max_episodes = 100          # 最大训练回合数
+        self.step_per_episode = 1200     # 每个回合的最大步数
 
         self.plot_dir = './outputs/output2'
         self.sumo_controller = SumoController()     #初始化一个sumo控制器
@@ -45,7 +45,8 @@ class mytrainer:
             # 计算输入维度
             num_links = len(controlled_links[0]) + len(controlled_links[1])
             # input_dim = 26  # 每条车道的状态信息维度 6.net版本
-            input_dim = 50  # 每条车道的状态信息维度 
+            # input_dim = 50  # 每条车道的状态信息维度 
+            input_dim = 98  # 每条车道的状态信息维度 
             self.agent_list.append(myAgent(tls_id,input_dim))
             self.agent_list[-1].set_controlled_lanes(controlled_links)
             self.agent_list[-1].init_RV_list(num_links)
@@ -84,12 +85,17 @@ class mytrainer:
         selected_agent_states = self.get_selected_agents_state(selected_agent_indexs)
         # print(selected_agent_states)
         selected_agent_actions = self.get_selected_agents_action(selected_agent_indexs,selected_agent_states)
+
         selected_agent_cur_RV_list = self.get_selected_agents_RV_list(selected_agent_indexs)
-        # selected_agent_cur_RP_list = self.get_selected_agents_RV_list(selected_agent_indexs) TODO
-        # selected_agent_cur_RE_list = self.get_selected_agents_RV_list(selected_agent_indexs) TODO
         selected_agent_RV_rewards = self.get_selected_agents_RV_reward(selected_agent_indexs,selected_agent_cur_RV_list)
         self.update_RV_list(selected_agent_indexs,selected_agent_cur_RV_list)  # 更新智能体的RV列表
-        selected_agent_rewards = self.get_selected_agents_reward(selected_agent_RV_rewards)  # 计算总体奖励值
+
+        
+        selected_agent_cur_RE_list = self.get_selected_agents_RE_list(selected_agent_indexs) 
+        selected_agent_RE_rewards = self.get_selected_agents_RE_reward(selected_agent_indexs,selected_agent_cur_RE_list)
+
+        # selected_agent_cur_RP_list = self.get_selected_agents_RV_list(selected_agent_indexs) TODO
+        selected_agent_rewards = self.get_selected_agents_reward(selected_agent_RV_rewards, selected_agent_RE_rewards)  # 计算总体奖励值
         for i, idx in enumerate(selected_agent_indexs):
             self.agent_list[idx].add_reward(selected_agent_rewards[i])
         self.store_experience(selected_agent_indexs, selected_agent_states, selected_agent_rewards, selected_agent_actions)  # 将经验存储到对应智能体的即时缓冲区中
@@ -176,14 +182,20 @@ class mytrainer:
         lane_num = len(agent.controlled_lanes[lanes_choice])
         # 获取所有受控车道的车辆信息,添加到状态向量
         for lane in agent.controlled_lanes[lanes_choice]:
-            current_lane_state = [0,0,0]
+            current_lane_state = [0,0,0,0,0,0]
             state = self.sumo_controller.get_vehicles_in_area(lane)  # 获取各个车道的车辆信息
             vehicle_count = state["vehicle_count"]  # 车辆数量
             vehicle_total_waiting_time = state["total_waiting_time"]  # 车辆数量
             vehicle_max_wait_time = state['max_waiting_time']  # 车辆最大等待时间
-            current_lane_state[0] += vehicle_count  # 车辆数量
+            emergency_count = state['emergency_count']  #急救车数量
+            emergency_max_wait_time = state['emergency_max_wait_time']  #急救车最大等待时间
+            emergency_total_wait_time = state['emergency_total_wait_time'] #急救车总等待时间
+            current_lane_state[0] += vehicle_count  # 车辆数量 
             current_lane_state[1] += vehicle_total_waiting_time  # 总体等待时间 
             current_lane_state[2] = max(current_lane_state[2],vehicle_max_wait_time)
+            current_lane_state[3] += emergency_count
+            current_lane_state[4] += emergency_total_wait_time  # 急救车总体等待时间 
+            current_lane_state[5] = max(current_lane_state[5],emergency_max_wait_time)
             current_state.extend(current_lane_state)
         return current_state
 
@@ -255,7 +267,7 @@ class mytrainer:
             RV_reward = - VT_max_cur   ###  尝试用等待时间代替奖励函数   
             RV_reward_list.append(RV_reward)
         return RV_reward_list
-    
+
     def update_RV_list(self,selected_agent_indexs,selected_agent_cur_RV_list):
         selected_agent_num = len(selected_agent_indexs)
         for i in range(selected_agent_num):
@@ -266,10 +278,50 @@ class mytrainer:
                 self.agent_list[index].RV_list[j].VT = agent_cur_RV_list[j][0]
                 self.agent_list[index].RV_list[j].NT = agent_cur_RV_list[j][1]
     
-    def get_selected_agents_reward(self,selected_agent_RV_rewards):
+    def get_selected_agents_RE_list(self,selected_agent_indexs):
+        '''获取当前智能体的RV列表'''
+        selected_agent_RE_list = []  
+        for i in selected_agent_indexs:
+            cur_agent_RE_list = []
+            for lane in self.agent_list[i].controlled_lanes[self.agent_list[i].NS_lanes_index]:  # 遍历智能体控制的南北车道
+                current_lane_state = [0]
+                state = self.sumo_controller.get_vehicles_in_area(lane)  # 获取各个车道的车辆信
+                emergency_max_wait_time = state['emergency_max_wait_time']  
+                current_lane_state[0] += emergency_max_wait_time     # 只放入一个急救车最大等待时间
+                cur_agent_RE_list.append(current_lane_state)
+            for lane in self.agent_list[i].controlled_lanes[self.agent_list[i].EW_lanes_index]:  # 遍历智能体控制的东西车道
+                current_lane_state = [0]
+                state = self.sumo_controller.get_vehicles_in_area(lane)  # 获取各个车道的车辆信
+                emergency_max_wait_time = state['emergency_max_wait_time']  
+                current_lane_state[0] += emergency_max_wait_time     # 只放入一个急救车最大等待时间
+                cur_agent_RE_list.append(current_lane_state)
+            selected_agent_RE_list.append(cur_agent_RE_list)
+        return selected_agent_RE_list
+    def get_selected_agents_RE_reward(self,selected_agent_indexs,selected_agent_cur_RE_list):
+        ''''''
+        selected_agent_num = len(selected_agent_indexs)
+        RV_reward_list = []
+        for i in range(selected_agent_num):
+            cur_RV_list = selected_agent_cur_RE_list[i]
+            RV_reward = 0
+            VT_max_cur = 0
+            for j in range(len(cur_RV_list)):
+                VT_max_cur = max(VT_max_cur,cur_RV_list[j][0])
+            RV_reward = - VT_max_cur   ###  尝试用等待时间代替奖励函数   
+            RV_reward_list.append(RV_reward)
+        return RV_reward_list
+    def get_selected_agents_reward(self,selected_agent_RV_rewards, selected_agent_RE_rewards):
         '''根据各个分项奖励，加权形成智能体奖励'''
-        # TODO 增加RP RE 两个分项
-        return selected_agent_RV_rewards
+        # TODO 增加RP 分项
+        # print(selected_agent_RE_rewards)
+        RE_weight = 10
+        selected_RV_num = len(selected_agent_RV_rewards)
+        for i in range(selected_RV_num):
+            if i < len(selected_agent_RE_rewards):
+                selected_agent_RV_rewards[i] += selected_agent_RE_rewards[i] * RE_weight   
+            else:
+                print("RE 与 RV出现不匹配的情况")
+        return selected_agent_RV_rewards 
 
     #TODO:增加一个函数，专门用来计算RP奖励和RE奖励，输入是智能体的RV列表和之前存储的RP RE列表，输出是当前的RP RE奖励值，然后在get_selected_agents_reward函数中进行加权计算得到最终奖励值
     def store_experience(self, selected_agent_indexs, selected_agent_states, selected_agent_rewards, selected_agent_actions):
