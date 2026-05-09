@@ -23,7 +23,7 @@ class mytrainer:
 
     def __init__(self):
         self.episode = 0
-        self.max_episodes = 100          # 最大训练回合数
+        self.max_episodes = 10          # 最大训练回合数
         self.step_per_episode = 800     # 每个回合的最大步数
 
         self.plot_dir = './outputs/output2'
@@ -459,64 +459,44 @@ class mytrainer:
                 #         agent.update_target_network()
                         # print(f"当前探索率为{agent.epsilon}")
         
-        # ===== 计算本回合的平均值（合并NS和EW方向）=====
+            # ===== 计算本回合的指标 =====
             for agent_id in step_queues:
-            # 计算NS和EW的平均队列长度，再取整体平均
+                # 计算队列长度、等待时间、急救车延误
                 avg_ns_queue = np.mean(step_queues[agent_id]['NS']) if step_queues[agent_id]['NS'] else 0
                 avg_ew_queue = np.mean(step_queues[agent_id]['EW']) if step_queues[agent_id]['EW'] else 0
                 avg_queue = (avg_ns_queue + avg_ew_queue) / 2
-            
-            # 计算NS和EW的平均等待时间
-                # avg_ns_wait = np.mean(step_waitings[agent_id]['NS']) if step_waitings[agent_id]['NS'] else 0
-                # avg_ew_wait = np.mean(step_waitings[agent_id]['EW']) if step_waitings[agent_id]['EW'] else 0
-                # avg_waiting = (avg_ns_wait + avg_ew_wait) / 2
-
-                # avg_ns_emergency = np.mean(step_emergency[agent_id]['NS']) if step_emergency[agent_id]['NS'] else 0
-                # avg_ew_emergency = np.mean(step_emergency[agent_id]['EW']) if step_emergency[agent_id]['EW'] else 0
-                # avg_emergency = (avg_ns_emergency + avg_ew_emergency) / 2
 
                 total_ns_wait = step_waitings[agent_id]['NS']
                 total_ew_wait = step_waitings[agent_id]['EW']
-                total_waiting = total_ns_wait + total_ew_wait   # 总等待时间
+                total_waiting = total_ns_wait + total_ew_wait
 
                 total_ns_emergency = step_emergency[agent_id]['NS']
                 total_ew_emergency = step_emergency[agent_id]['EW']
-                total_emergency = total_ns_emergency + total_ew_emergency   # 急救车总延误
+                total_emergency = total_ns_emergency + total_ew_emergency
 
-            # 记录到logger
-                self.logger.log_episode_metrics(agent_id, avg_queue, total_waiting) 
-                self.logger.log_episode_emergency(agent_id, total_emergency)  # 记录紧急车数据      
-            
-            # 记录奖励（从智能体获取）
-            # for agent in self.agent_list:
-            #     if agent.id == agent_id and agent.reward_list:
-            #         last_reward = agent.reward_list[-1] if agent.reward_list else 0
-            #         self.logger.log_agent_rewards(agent, last_reward)
-            # ===== 记录奖励（每个 agent 只处理一次，移到循环外面）=====
+                self.logger.log_episode_metrics(agent_id, avg_queue, total_waiting)
+                self.logger.log_episode_emergency(agent_id, total_emergency)
+
+            # ===== 记录奖励（移到循环外面）=====
             for agent in self.agent_list:
                 if agent.reward_list:
                     total_reward = sum(agent.reward_list)
                     self.logger.log_agent_rewards(agent, total_reward)
-                    agent.reward_list = []   # 清空，准备下一回合
+                    agent.reward_list = []
                     print(f"  回合 {self.episode}, Agent {agent.id}, 累计奖励: {total_reward:.2f}")
 
             # ===== 更新网络 =====
             for agent in self.agent_list:
+                print(f"Agent {agent.id} Episode {self.episode} Immediate Buffer Size: {len(agent.immediate_buffer)}")
                 agent.update_epsilon()
                 agent.update_target_network()
                 print(f"当前探索率为{agent.epsilon}")
 
-            print(f"  回合完成！")
+            print(f"  回合完成！")   # ← 这个要放在外面，每个回合只打印一次
     
     # ===== 生成所有图表 =====
         print("\n数据收集完成！正在生成图表...")
         self.logger.finalize()
-        for agent in self.agent_list:
-            print(f"Agent {agent.id} Episode {self.episode} Immediate Buffer Size: {len(agent.immediate_buffer)}")
-            agent.reset_all()
-            agent.update_epsilon()
-            agent.update_target_network()
-            print(f"当前探索率为{agent.epsilon}")
     
         print(f"\n所有图表已保存到: {self.plot_dir}")
         print("生成的文件:")
