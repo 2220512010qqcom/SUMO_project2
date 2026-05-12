@@ -37,8 +37,9 @@ class myAgent:
         self.phase = 0                                              # 当前相位 0为南北红东西绿  1为南北绿东西红
         self.duration = 0                                           # 当前持续时间
         self.action_dim = len(self.action_space)                    # 动作维度
-        self.behavior = myDQN(self.input_dim, self.action_dim)      # 行为网络
-        self.target = myDQN(self.input_dim, self.action_dim)        # 目标网络
+        self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        self.behavior = myDQN(self.input_dim, self.action_dim).to(self.device)      # 行为网络
+        self.target = myDQN(self.input_dim, self.action_dim).to(self.device)        # 目标网络
         self.learning_rate = 0.01
         self.train_experience_number = 320                           # 每次训练使用的经验数量
 
@@ -145,6 +146,7 @@ class myAgent:
         """根据当前状态选择动作"""
         if random.random() < self.epsilon:
             return random.choice(self.action_space)
+        state = state.to(self.device)
         with torch.no_grad():
             q_values = self.behavior(state)
             action_index = torch.argmax(q_values).item()
@@ -176,10 +178,10 @@ class myAgent:
             next_states.append(ns)
     
         # 形成矩阵
-        states = torch.tensor(states, dtype=torch.float32)
-        actions = torch.tensor(actions, dtype=torch.int64).unsqueeze(1)
-        rewards = torch.tensor(rewards, dtype=torch.float32).unsqueeze(1)
-        next_states = torch.tensor(next_states, dtype=torch.float32)
+        states = torch.tensor(states, dtype=torch.float32, device=self.device)
+        actions = torch.tensor(actions, dtype=torch.int64, device=self.device).unsqueeze(1)
+        rewards = torch.tensor(rewards, dtype=torch.float32, device=self.device).unsqueeze(1)
+        next_states = torch.tensor(next_states, dtype=torch.float32, device=self.device)
         # 计算当前Q值
         current_q_values = self.behavior(states).gather(1, actions)
         # 计算目标Q值
@@ -209,7 +211,8 @@ class myAgent:
     def load_weight_args(self):
         '''加载神经网络权重参数'''
         # 加载权重
-        self.target.load_state_dict(torch.load(f"trained_agent{self.id}.pth", map_location=torch.device('cuda')))
+        self.target.load_state_dict(torch.load(f"trained_agent{self.id}.pth", map_location=self.device))
+        self.target.to(self.device)
         self.target.eval()  # 切换到评估模式（关闭 dropout/batchnorm 更新）
         print("✅ Model loaded successfully!")
 

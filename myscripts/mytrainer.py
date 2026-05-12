@@ -12,6 +12,7 @@
 #TODO:1.消除急救车警告 2.思考多层缓冲架构及其实现
 import os
 import random
+from datetime import datetime
 from matplotlib import pyplot as plt
 import torch
 import numpy as np
@@ -24,9 +25,9 @@ class mytrainer:
     def __init__(self):
         self.episode = 0
         self.max_episodes = 100          # 最大训练回合数
-        self.step_per_episode = 1200     # 每个回合的最大步数
+        self.step_per_episode = 401     # 每个回合的最大步数
 
-        self.plot_dir = './outputs/output2'
+        self.plot_dir = './outputs/output7'
         self.sumo_controller = SumoController()     #初始化一个sumo控制器
         self.sumo_controller.start_sumo()
         self.lane_state_num = 2         # 每个车道有多少状态信息要计算
@@ -566,6 +567,8 @@ class mytrainer:
 
 # 定义main函数 
 def main():
+    start = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    print(f"开始时间：{start}")
     trainer = mytrainer()
     logger = myLogger(trainer.plot_dir)
     trainer.set_logger(logger)
@@ -582,6 +585,9 @@ def main():
     print("完成！请查看输出目录中的图片文件")
     print(f"输出目录: {trainer.plot_dir}")
     print("*" * 60)
+    end = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    print(f"开始时间：{start}")
+    print(f"结束时间：{end}")
     
 if __name__ == '__main__':
     main()
