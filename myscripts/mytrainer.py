@@ -27,14 +27,19 @@ class mytrainer:
         self.max_episodes = 100          # 最大训练回合数
         self.step_per_episode = 401     # 每个回合的最大步数
 
-        self.plot_dir = './outputs/output7'
+        self.plot_dir = './outputs/output618/8'
         self.sumo_controller = SumoController()     #初始化一个sumo控制器
         self.sumo_controller.start_sumo()
         self.lane_state_num = 2         # 每个车道有多少状态信息要计算
 
         self.agent_list = []
         # self.duration_options = [10, 40,10,40]  # 动作对应的持续时间选项
-        self.duration_options = [10, 40]  # 动作对应的持续时间选项
+        self.duration_options = [10,40]  # 动作对应的持续时间选项
+        # self.duration_options = [5,60]  # 动作对应的持续时间选项
+        # self.duration_options = [1,5,10,40]  # 动作对应的持续时间选项
+        # self.duration_options = [1,5,10,20,40,60,80]  # 动作对应的持续时间选项
+        # self.duration_options = [10,20,40,60,80]  # 动作对应的持续时间选项
+        # self.duration_options = [10,20]  # 动作对应的持续时间选项
         self.initialize_agents()        # 根据交通灯数量初始化智能体，并设置每个智能体控制的车道列表
         self.duration = [0] * self.agent_num          # 每个智能体当前剩余的变灯时间,初始为0，表示可以立即选择动作
 
@@ -52,6 +57,7 @@ class mytrainer:
             self.agent_list[-1].set_controlled_lanes(controlled_links)
             self.agent_list[-1].init_RV_list(num_links)
         self.agent_num = len(self.agent_list)
+        # self.agent_num = 1 # 当前将智能体数量强制设置为1，用来进行消融实验
         print(f"智能体初始化完成，数量为{self.agent_num}")
         return
 
@@ -66,7 +72,9 @@ class mytrainer:
             self.sumo_controller.reset_simulation()
 
             # 每个轮次进行若干步的训练
-            for _ in range(self.step_per_episode):
+            step_per_episode_temp = ((ep + 1) / 10 + 1) * self.step_per_episode
+            print(f"当前回合部署{step_per_episode_temp}")
+            for _ in range(step_per_episode_temp):
                 self.train_step()
 
             # 每个回合结束后，可以在这里进行经验回放和网络更新
@@ -203,10 +211,6 @@ class mytrainer:
     def culculate_traffic_index(self, count, weight, average_speed, basic_index, max_waiting_time):
         '''计算交通指数的函数,作为当前状态的一部分'''
         return (count * weight) / (average_speed + basic_index) + max_waiting_time
-
-    def reward_function(self, state):
-        # state为[车数量，等待时间，急救车数量，急救车最小速度, 急救车最大等待时间 ,ignore_args]
-        return 1 - state[0] - state[1] - state[2]  # 车辆数量和等待时间越多，奖励越低；急救车数量越多，奖励大幅降低
 
     def get_selected_agents_rewards(self,selected_agent_indexs,selected_agent_states):
         '''根据当前状态计算上一步的奖励'''
@@ -477,8 +481,12 @@ class mytrainer:
             # step_emergency = {agent.id: {'NS': [], 'EW': []} for agent in self.agent_list}  # 紧急车数据
             step_waitings = {agent.id: {'NS': 0, 'EW': 0} for agent in self.agent_list}      # 改为累加
             step_emergency = {agent.id: {'NS': 0, 'EW': 0} for agent in self.agent_list}      # 改为累加
-        
-            for step in range(self.step_per_episode):
+            step_n = episode // 15 + 1
+            # step_per_episode_temp = (4 * step_n + 1) * self.step_per_episode # 5回合变步公式
+            # step_per_episode_temp = (step_n + 1) * self.step_per_episode # 2回合变步公式
+            step_per_episode_temp = self.step_per_episode # 1回合变步公式，当前版本不变
+            print(f"当前回合步数：{step_per_episode_temp}步")  # 显示当前回合的步数部署情况
+            for step in range(step_per_episode_temp):
             # 执行一步训练
                 self.train_step()
             
@@ -539,11 +547,13 @@ class mytrainer:
                     print(f"  回合 {self.episode}, Agent {agent.id}, 累计奖励: {total_reward:.2f}")
 
             # ===== 更新网络 =====
-            for agent in self.agent_list:
-                print(f"Agent {agent.id} Episode {self.episode} Immediate Buffer Size: {len(agent.immediate_buffer)}")
-                agent.update_epsilon()
-                agent.update_target_network()
-                print(f"当前探索率为{agent.epsilon}")
+            # for _ in range(step_n):
+            for _ in range(2):
+                for agent in self.agent_list:
+                    print(f"Agent {agent.id} Episode {self.episode} Immediate Buffer Size: {len(agent.immediate_buffer)}")
+                    agent.update_epsilon()
+                    agent.update_target_network()
+                    print(f"当前探索率为{agent.epsilon}")
 
             print(f"  回合完成！")   # ← 这个要放在外面，每个回合只打印一次
     

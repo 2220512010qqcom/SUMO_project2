@@ -30,7 +30,9 @@ class myAgent:
     def __init__(self, id, input_dim=4):
         self.id = id
         self.immediate_buffer = []                                  # 即时缓冲区
+        # self.action_space = [0,1,2,3,4,5,6]                                   # 0:东西绿 10秒 1:东西绿 40秒 2:南北绿 10秒 3:南北绿 40秒
         # self.action_space = [0,1,2,3]                                   # 0:东西绿 10秒 1:东西绿 40秒 2:南北绿 10秒 3:南北绿 40秒
+        # self.action_space = [0,1,2,3,4]                                   # 0:东西绿 10秒 1:东西绿 40秒 2:南北绿 10秒 3:南北绿 40秒
         self.action_space = [0,1]                                   # 0:10秒 1:40秒 
         self.input_dim = input_dim                                        # 输入维度
         self.start_time = 0                                         # 开始时间
