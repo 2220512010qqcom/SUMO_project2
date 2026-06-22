@@ -27,7 +27,7 @@ class mytrainer:
         self.max_episodes = 100          # 最大训练回合数
         self.step_per_episode = 401     # 每个回合的最大步数
 
-        self.plot_dir = './outputs/output618/8'
+        self.plot_dir = './outputs/output619'
         self.sumo_controller = SumoController()     #初始化一个sumo控制器
         self.sumo_controller.start_sumo()
         self.lane_state_num = 2         # 每个车道有多少状态信息要计算
